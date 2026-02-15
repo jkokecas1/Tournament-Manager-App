@@ -1,0 +1,12 @@
+{
+    "user_id_counter": 2,
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "password": "admin",
+            "role": "admin",
+            "team_id": null
+        }
+    ]
+}

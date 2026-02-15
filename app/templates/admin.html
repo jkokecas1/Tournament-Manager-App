@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ _('👑 Admin Dashboard') }}</h2>
+
+<!-- System Overview Stats -->
+<div class="grid" style="margin-bottom: 30px;">
+    <div class="card" style="text-align: center; border-left: 5px solid #3498db;">
+        <h3 style="margin: 0; font-size: 2em;">{{ stats.tournament_count }}</h3>
+        <p style="margin: 0; color: #7f8c8d;">{{ _('Tournaments') }}</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 5px solid #2ecc71;">
+        <h3 style="margin: 0; font-size: 2em;">{{ stats.team_count }}</h3>
+        <p style="margin: 0; color: #7f8c8d;">{{ _('Teams') }}</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 5px solid #e67e22;">
+        <h3 style="margin: 0; font-size: 2em;">{{ stats.match_count }}</h3>
+        <p style="margin: 0; color: #7f8c8d;">{{ _('Matches') }}</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 5px solid #9b59b6;">
+        <h3 style="margin: 0; font-size: 2em;">{{ stats.user_count }}</h3>
+        <p style="margin: 0; color: #7f8c8d;">{{ _('Users') }}</p>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <h3>{{ _('⚙️ Site Settings') }}</h3>
+        <form action="{{ url_for('admin.update_settings') }}" method="post" enctype="multipart/form-data">
+            <div style="margin-bottom: 15px;">
+                <label><strong>{{ _('Company Name') }}</strong></label>
+                <input type="text" name="company_name" value="{{ site_config.company_name if site_config else '' }}"
+                    placeholder="Review Company Name" style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Company Logo') }}</label>
+                {% if config and config.company_logo_data %}
+                <div style="margin: 10px 0;">
+                    <img src="{{ url_for('admin.company_logo') }}" alt="Current Logo" style="height: 50px;">
+                </div>
+                {% endif %}
+                <input type="file" name="company_logo" accept="image/*">
+            </div>
+
+            <h4 style="margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px;">{{ _('Social Media Links')
+                }}</h4>
+            <div style="margin-bottom: 10px;">
+                <label>Facebook URL</label>
+                <input type="text" name="social_facebook"
+                    value="{{ site_config.social_facebook if site_config else '' }}"
+                    placeholder="https://facebook.com/..." style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Twitter (X) URL</label>
+                <input type="text" name="social_twitter" value="{{ site_config.social_twitter if site_config else '' }}"
+                    placeholder="https://twitter.com/..." style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label>Instagram URL</label>
+                <input type="text" name="social_instagram"
+                    value="{{ site_config.social_instagram if site_config else '' }}"
+                    placeholder="https://instagram.com/..." style="width: 100%;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label><strong>{{ _('Default Language') }}</strong></label>
+                <select name="default_language">
+                    <option value="en" {% if site_config and site_config.default_language=='en' %}selected{% endif %}>
+                        English 🇬🇧</option>
+                    <option value="es" {% if site_config and site_config.default_language=='es' %}selected{% endif %}>
+                        Español 🇪🇸</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn">{{ _('Save Settings') }}</button>
+        </form>
+    </div>
+
+    <!-- User Management Link -->
+    <div class="card"
+        style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <h1 style="font-size: 4em; margin-bottom: 10px;">👤</h1>
+        <h3>{{ _('User Management') }}</h3>
+        <p>{{ _('Manage all system users, roles, and bulk generate team representatives.') }}</p>
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary" style="width: 100%;">{{ _('Go to User
+            Manager') }}</a>
+    </div>
+
+    <!-- Tournament Management -->
+    <div class="card">
+        <h3>{{ _('🏆 Tournament Management') }}</h3>
+        <p>{{ _('Direct Access to all Tournaments:') }}</p>
+        <ul>
+            {% for t in tournaments %}
+            <li style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                <strong>{{ t.name }}</strong> ({{ t.category }})
+                <br>
+                <div style="margin-top: 5px;">
+                    <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}" class="btn btn-secondary"
+                        style="padding: 2px 8px; font-size: 0.8em;">Dashboard</a>
+                    <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}" class="btn btn-secondary"
+                        style="padding: 2px 8px; font-size: 0.8em;">Teams</a>
+                </div>
+            </li>
+            {% else %}
+            <li>{{ _('No tournaments found.') }}</li>
+            {% endfor %}
+        </ul>
+
+        <div style="margin-top: 20px;">
+            <h4>{{ _('Create New Tournament') }}</h4>
+            <form action="{{ url_for('tournaments.create_tournament') }}" method="post">
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="text" name="category" placeholder="Category (e.g., U12)" required>
+                <button type="submit" class="btn">{{ _('Create') }}</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

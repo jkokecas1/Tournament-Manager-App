@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin-top: 100px; text-align: center;">
+    <div
+        style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 60px 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div style="font-size: 80px; margin-bottom: 20px;">🔒</div>
+        <h1 style="color: white; font-size: 48px; margin-bottom: 20px;">{{ _('Login Required') }}</h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 18px; margin-bottom: 30px;">
+            {{ _('You need to be logged in to access this page.') }}
+        </p>
+        <p style="color: rgba(255,255,255,0.8); font-size: 16px; margin-bottom: 40px;">
+            {{ _('Please log in with your credentials to continue.') }}
+        </p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-light"
+                style="padding: 12px 30px; border-radius: 25px; font-weight: 600;">
+                🔐 {{ _('Login') }}
+            </a>
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-light"
+                style="padding: 12px 30px; border-radius: 25px; font-weight: 600;">
+                🏠 {{ _('Go to Home') }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

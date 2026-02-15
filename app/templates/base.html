@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site_config.company_name if site_config else 'Tournament Manager' }}</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --augment: #27ae60;
+            --danger: #c0392b;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f6f7;
+            color: #333;
+        }
+
+        .navbar {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .navbar .brand {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--dark);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background: var(--augment);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #219150;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: var(--light);
+        }
+
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #555;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-tabs a.active {
+            border-bottom-color: var(--augment);
+            color: var(--augment);
+            font-weight: bold;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="brand">
+            {% if site_config and site_config.company_logo_data %}
+            <img src="{{ url_for('admin.company_logo') }}" alt="Logo" style="height: 40px; border-radius: 50%;">
+            {% else %}
+            <span style="font-size: 1.5rem;">⚽</span>
+            {% endif %}
+            {{ site_config.company_name if site_config else 'Tournament Manager' }}
+        </div>
+        <div>
+            <a href="/">{{ _('Home') }}</a>
+            {% if t %}
+            <span> | {{ t.name }} </span>
+            <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}">{{ _('Dashboard') }}</a>
+            <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}">{{ _('Teams') }}</a>
+            <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}">{{ _('Matches') }}</a>
+            <a href="{{ url_for('tournaments.tournament_standings', t_id=t.id) }}">{{ _('Standings') }}</a>
+            {% endif %}
+
+            <span style="border-left: 1px solid #ffffff55; margin-left: 10px; padding-left: 10px;"></span>
+
+            {% if current_user %}
+            <span title="Role: {{ current_user.role }}">👤 {{ current_user.username }}</span>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin.admin_panel') }}" style="color: #f1c40f;">{{ _('Admin') }}</a>
+            {% endif %}
+            {% if current_user.role == 'rep' or current_user.role == 'admin' %}
+            <a href="{{ url_for('tournaments.pending_goals') }}">
+                {{ _('Pending Goals') }}
+                {% set pending_count = current_user.team.pending_goals|selectattr('assigned_count', 'lt', 3)|list|length
+                if current_user.team else 0 %}
+                {% if pending_count > 0 %}
+                <span
+                    style="background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7em;">{{
+                    pending_count }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" style="font-weight: normal; font-size: 0.9em;">{{ _('Logout') }}</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>
+            {% endif %}
+
+            <a href="{{ url_for('admin.set_language', lang='en') }}" title="English">🇬🇧</a>
+            <a href="{{ url_for('admin.set_language', lang='es') }}" title="Español">🇪🇸</a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    <footer style="text-align: center; padding: 20px; margin-top: 40px; color: #777; font-size: 0.9em;">
+        <div style="margin-bottom: 10px;">
+            {% if site_config and site_config.social_facebook %}
+            <a href="{{ site_config.social_facebook }}" style="margin: 0 10px; color: #3b5998;">Facebook</a>
+            {% endif %}
+            {% if site_config and site_config.social_twitter %}
+            <a href="{{ site_config.social_twitter }}" style="margin: 0 10px; color: #1da1f2;">Twitter</a>
+            {% endif %}
+            {% if site_config and site_config.social_instagram %}
+            <a href="{{ site_config.social_instagram }}" style="margin: 0 10px; color: #e4405f;">Instagram</a>
+            {% endif %}
+        </div>
+        <p>&copy; 2024 {{ site_config.company_name if site_config else 'Tournament Manager' }}. All rights reserved.
+        </p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ _('Teams & Players') }}</h2>
+
+{% if current_user and current_user.role == 'admin' %}
+<div class="card">
+    <h3>{{ _('Add Team') }}</h3>
+    <form action="{{ url_for('tournaments.add_team', t_id=t.id) }}" method="post" style="display: flex; gap: 10px;">
+        <input type="text" name="name" placeholder="{{ _('Team Name') }}" required>
+        <button type="submit" class="btn">{{ _('Add Team') }}</button>
+    </form>
+</div>
+{% endif %}
+
+<!-- Search Filter -->
+<div class="card" style="margin-bottom: 20px;">
+    <input type="text" id="teamSearch" placeholder="{{ _('🔍 Search Team...') }}" onkeyup="filterTeams()"
+        style="width: 100%; padding: 10px; font-size: 1.1em; border: 1px solid #ddd; border-radius: 4px;">
+</div>
+
+<div class="grid" id="teamsGrid">
+    {% for team in t.teams %}
+    <div class="card team-card {{ 'withdrawn' if not team.is_active else '' }}"
+        style="{{ 'opacity: 0.6; filter: grayscale(1);' if not team.is_active else '' }}">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            {% if team.logo_data %}
+            <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=team.id) }}" alt="{{ team.name }}"
+                class="team-logo">
+            {% else %}
+            <div class="team-logo-placeholder">⚽</div>
+            {% endif %}
+            <h3>{{ team.name }}</h3>
+        </div>
+
+        <h4>{{ _('Players') }} ({{ team.players|length }})</h4>
+        <ul>
+            {% for player in team.players %}
+            <li>#{{ player.number }} {{ player.name }} ({{ player.position }})</li>
+            {% endfor %}
+        </ul>
+
+        {% if current_user and (current_user.role == 'admin' or (current_user.role == 'rep' and current_user.team_id ==
+        team.id)) %}
+        <hr>
+        <!-- Logo Upload -->
+        <form action="{{ url_for('tournaments.upload_logo') }}" method="post" enctype="multipart/form-data"
+            style="margin-bottom: 10px;">
+            <input type="hidden" name="t_id" value="{{ t.id }}">
+            <input type="hidden" name="team_id" value="{{ team.id }}">
+            <input type="file" name="logo" required style="font-size: 0.8em;">
+            <button type="submit" class="btn btn-secondary" style="font-size: 0.7em; padding: 2px 5px;">{{ _('Upload
+                Logo') }}</button>
+        </form>
+
+        <form action="{{ url_for('tournaments.add_player', t_id=t.id) }}" method="post">
+            <input type="hidden" name="team_id" value="{{ team.id }}">
+            <input type="text" name="name" placeholder="{{ _('Player Name') }}" required>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" name="number" placeholder="#" style="width: 60px;">
+                <input type="text" name="position" placeholder="{{ _('Pos') }}" style="width: 80px;">
+            </div>
+            <button type="submit" class="btn btn-secondary" style="font-size: 0.8em; width: 100%;">{{ _('Add Player')
+                }}</button>
+        </form>
+        {% if current_user and current_user.role == 'admin' %}
+        <hr>
+        <form action="{{ url_for('tournaments.withdraw_team', t_id=t.id, team_id=team.id) }}" method="post"
+            onsubmit="return confirm('{{ _('Are you sure you want to withdraw this team? This will set all matches to 3-0.') }}');">
+            <button type="submit" class="btn btn-secondary" style="background: #e74c3c; width: 100%; font-size: 0.8em;">
+                {{ _('Withdraw Team') if team.is_active else _('Team Withdrawn') }}
+            </button>
+        </form>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function filterTeams() {
+        var input, filter, grid, cards, h3, i, txtValue;
+        input = document.getElementById('teamSearch');
+        filter = input.value.toUpperCase();
+        grid = document.getElementById("teamsGrid");
+        cards = grid.getElementsByClassName('team-card');
+
+        for (i = 0; i < cards.length; i++) {
+            h3 = cards[i].getElementsByTagName("h3")[0];
+            txtValue = h3.textContent || h3.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                cards[i].style.display = "";
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+    }
+</script>
+{% endblock %}

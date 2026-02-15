@@ -1,0 +1,517 @@
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-02-14 15:54-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app/auth_decorators.py:16 app/auth_decorators.py:29
+#: app/auth_decorators.py:46 app/auth_decorators.py:63
+#: app/auth_decorators.py:80 app/auth_decorators.py:98
+msgid "Please log in to access this page."
+msgstr ""
+
+#: app/templates/admin.html:4
+msgid "👑 Admin Dashboard"
+msgstr ""
+
+#: app/templates/admin.html:10
+msgid "Tournaments"
+msgstr ""
+
+#: app/templates/admin.html:14 app/templates/base.html:166
+#: app/templates/tournament_dashboard.html:10
+msgid "Teams"
+msgstr ""
+
+#: app/templates/admin.html:18 app/templates/base.html:167
+msgid "Matches"
+msgstr ""
+
+#: app/templates/admin.html:22
+msgid "Users"
+msgstr ""
+
+#: app/templates/admin.html:28
+msgid "⚙️ Site Settings"
+msgstr ""
+
+#: app/templates/admin.html:31
+msgid "Company Name"
+msgstr ""
+
+#: app/templates/admin.html:37
+msgid "Company Logo"
+msgstr ""
+
+#: app/templates/admin.html:47
+msgid "Social Media Links"
+msgstr ""
+
+#: app/templates/admin.html:68
+msgid "Default Language"
+msgstr ""
+
+#: app/templates/admin.html:77
+msgid "Save Settings"
+msgstr ""
+
+#: app/templates/admin.html:87
+msgid "👤 User Management"
+msgstr ""
+
+#: app/templates/admin.html:89 app/templates/admin.html:116
+msgid "Create User"
+msgstr ""
+
+#: app/templates/admin.html:98
+msgid "Role:"
+msgstr ""
+
+#: app/templates/admin.html:107
+msgid "Assign Team (For Reps):"
+msgstr ""
+
+#: app/templates/admin.html:131
+msgid "Existing Users"
+msgstr ""
+
+#: app/templates/admin.html:144
+msgid "🏆 Tournament Management"
+msgstr ""
+
+#: app/templates/admin.html:145
+msgid "Direct Access to all Tournaments:"
+msgstr ""
+
+#: app/templates/admin.html:159
+msgid "No tournaments found."
+msgstr ""
+
+#: app/templates/admin.html:164 app/templates/index.html:19
+msgid "Create New Tournament"
+msgstr ""
+
+#: app/templates/admin.html:168
+msgid "Create"
+msgstr ""
+
+#: app/templates/base.html:162 app/templates/match_detail.html:71
+msgid "Home"
+msgstr ""
+
+#: app/templates/base.html:165
+msgid "Dashboard"
+msgstr ""
+
+#: app/templates/base.html:168 app/templates/standings.html:5
+#: app/templates/standings.html:23 app/templates/tournament_dashboard.html:23
+msgid "Standings"
+msgstr ""
+
+#: app/templates/base.html:176
+msgid "Admin"
+msgstr ""
+
+#: app/templates/base.html:178
+msgid "Logout"
+msgstr ""
+
+#: app/templates/base.html:180 app/templates/error_401.html:18
+#: app/templates/error_403.html:29 app/templates/login.html:5
+#: app/templates/login.html:18
+msgid "Login"
+msgstr ""
+
+#: app/templates/error_401.html:8
+msgid "Login Required"
+msgstr ""
+
+#: app/templates/error_401.html:10
+msgid "You need to be logged in to access this page."
+msgstr ""
+
+#: app/templates/error_401.html:13
+msgid "Please log in with your credentials to continue."
+msgstr ""
+
+#: app/templates/error_401.html:22 app/templates/error_403.html:19
+msgid "Go to Home"
+msgstr ""
+
+#: app/templates/error_403.html:8
+msgid "Access Denied"
+msgstr ""
+
+#: app/templates/error_403.html:10
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: app/templates/error_403.html:13
+msgid ""
+"This page requires special permissions. Please contact an administrator "
+"if you believe you should have\n"
+"            access."
+msgstr ""
+
+#: app/templates/error_403.html:24
+msgid "Go Back"
+msgstr ""
+
+#: app/templates/index.html:5
+msgid "Available Tournaments"
+msgstr ""
+
+#: app/templates/index.html:11
+msgid "Category"
+msgstr ""
+
+#: app/templates/index.html:21
+msgid "Tournament Name"
+msgstr ""
+
+#: app/templates/index.html:22
+msgid "Category (e.g., U12)"
+msgstr ""
+
+#: app/templates/index.html:24
+msgid "Points System"
+msgstr ""
+
+#: app/templates/index.html:26
+msgid "Win"
+msgstr ""
+
+#: app/templates/index.html:27
+msgid "Draw"
+msgstr ""
+
+#: app/templates/index.html:28
+msgid "Loss"
+msgstr ""
+
+#: app/templates/index.html:31
+msgid "Create Tournament"
+msgstr ""
+
+#: app/templates/login.html:11
+msgid "Username"
+msgstr ""
+
+#: app/templates/login.html:14
+msgid "Password"
+msgstr ""
+
+#: app/templates/match_detail.html:4
+msgid "Match Details"
+msgstr ""
+
+#: app/templates/match_detail.html:9 app/templates/match_detail.html:11
+msgid "Referee:"
+msgstr ""
+
+#: app/templates/match_detail.html:11
+msgid "Not assigned"
+msgstr ""
+
+#: app/templates/match_detail.html:20
+msgid "Assign Referee:"
+msgstr ""
+
+#: app/templates/match_detail.html:27
+msgid "Save Ref"
+msgstr ""
+
+#: app/templates/match_detail.html:45
+msgid "Update Score"
+msgstr ""
+
+#: app/templates/match_detail.html:51
+msgid "📢 Match Events"
+msgstr ""
+
+#: app/templates/match_detail.html:60
+msgid "Unknown Player"
+msgstr ""
+
+#: app/templates/match_detail.html:64
+msgid "Goal"
+msgstr ""
+
+#: app/templates/match_detail.html:66
+msgid "Yellow Card"
+msgstr ""
+
+#: app/templates/match_detail.html:68
+msgid "Red Card"
+msgstr ""
+
+#: app/templates/match_detail.html:71
+msgid "Away"
+msgstr ""
+
+#: app/templates/match_detail.html:74
+msgid "No events recorded."
+msgstr ""
+
+#: app/templates/match_detail.html:83 app/templates/match_detail.html:110
+msgid "Events"
+msgstr ""
+
+#: app/templates/match_detail.html:87
+msgid "Player:"
+msgstr ""
+
+#: app/templates/match_detail.html:94
+msgid "Event:"
+msgstr ""
+
+#: app/templates/match_detail.html:101
+msgid "Minute:"
+msgstr ""
+
+#: app/templates/match_detail.html:104
+msgid "Add Event"
+msgstr ""
+
+#: app/templates/match_detail.html:137
+msgid "Back to Schedule"
+msgstr ""
+
+#: app/templates/metrics.html:4
+msgid "📊 Tournament Metrics"
+msgstr ""
+
+#: app/templates/metrics.html:14
+msgid "⚽ Top Scorers"
+msgstr ""
+
+#: app/templates/metrics.html:17
+msgid "Player"
+msgstr ""
+
+#: app/templates/metrics.html:18 app/templates/standings.html:32
+#: app/templates/standings.html:82
+msgid "Team"
+msgstr ""
+
+#: app/templates/metrics.html:19
+msgid "Goals"
+msgstr ""
+
+#: app/templates/metrics.html:33
+msgid "🔥 Most Goals in a Single Match"
+msgstr ""
+
+#: app/templates/metrics.html:38 app/templates/schedule.html:15
+#: app/templates/schedule.html:42
+msgid "Matchday"
+msgstr ""
+
+#: app/templates/metrics.html:46
+msgid "🏆 Most Wins"
+msgstr ""
+
+#: app/templates/metrics.html:61
+msgid "🎯 Best Attack (Goals For)"
+msgstr ""
+
+#: app/templates/metrics.html:73
+msgid "🥅 Most Conceded (Goals Against)"
+msgstr ""
+
+#: app/templates/metrics.html:85
+msgid "😇 Fair Play (Fewest Cards)"
+msgstr ""
+
+#: app/templates/schedule.html:4
+msgid "Schedule"
+msgstr ""
+
+#: app/templates/schedule.html:10
+msgid "Filter by Matchday:"
+msgstr ""
+
+#: app/templates/schedule.html:13
+msgid "All Matchdays"
+msgstr ""
+
+#: app/templates/schedule.html:22
+msgid "Filter by Team:"
+msgstr ""
+
+#: app/templates/schedule.html:25
+msgid "All Teams"
+msgstr ""
+
+#: app/templates/schedule.html:33
+msgid "Filter"
+msgstr ""
+
+#: app/templates/schedule.html:35
+msgid "Clear"
+msgstr ""
+
+#: app/templates/schedule.html:43
+msgid "Match"
+msgstr ""
+
+#: app/templates/schedule.html:44
+msgid "Result"
+msgstr ""
+
+#: app/templates/schedule.html:46
+msgid "Action"
+msgstr ""
+
+#: app/templates/schedule.html:87
+msgid "Edit"
+msgstr ""
+
+#: app/templates/schedule.html:87
+msgid "Update"
+msgstr ""
+
+#: app/templates/schedule.html:96
+msgid "No matches scheduled yet."
+msgstr ""
+
+#: app/templates/standings.html:8
+msgid "Export as Image"
+msgstr ""
+
+#: app/templates/standings.html:31 app/templates/standings.html:81
+#: app/templates/teams.html:58
+msgid "Pos"
+msgstr ""
+
+#: app/templates/standings.html:33 app/templates/standings.html:83
+msgid "P"
+msgstr ""
+
+#: app/templates/standings.html:34 app/templates/standings.html:84
+msgid "W"
+msgstr ""
+
+#: app/templates/standings.html:35 app/templates/standings.html:85
+msgid "D"
+msgstr ""
+
+#: app/templates/standings.html:36 app/templates/standings.html:86
+msgid "L"
+msgstr ""
+
+#: app/templates/standings.html:37 app/templates/standings.html:87
+msgid "GF"
+msgstr ""
+
+#: app/templates/standings.html:38 app/templates/standings.html:88
+msgid "GA"
+msgstr ""
+
+#: app/templates/standings.html:39 app/templates/standings.html:89
+msgid "GD"
+msgstr ""
+
+#: app/templates/standings.html:40 app/templates/standings.html:90
+msgid "Pts"
+msgstr ""
+
+#: app/templates/standings.html:41 app/templates/standings.html:91
+msgid "Last 5"
+msgstr ""
+
+#: app/templates/standings.html:110
+msgid "Won"
+msgstr ""
+
+#: app/templates/standings.html:112
+msgid "Drawn"
+msgstr ""
+
+#: app/templates/standings.html:114
+msgid "Lost"
+msgstr ""
+
+#: app/templates/teams.html:4
+msgid "Teams & Players"
+msgstr ""
+
+#: app/templates/teams.html:8 app/templates/teams.html:11
+msgid "Add Team"
+msgstr ""
+
+#: app/templates/teams.html:10
+msgid "Team Name"
+msgstr ""
+
+#: app/templates/teams.html:18
+msgid "🔍 Search Team..."
+msgstr ""
+
+#: app/templates/teams.html:33
+msgid "Players"
+msgstr ""
+
+#: app/templates/teams.html:49
+msgid ""
+"Upload\n"
+"                Logo"
+msgstr ""
+
+#: app/templates/teams.html:55
+msgid "Player Name"
+msgstr ""
+
+#: app/templates/teams.html:60
+msgid "Add Player"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:11
+msgid "Manage teams and players"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:17
+msgid "Matches (Schedule)"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:18
+msgid "View fixtures and results"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:24
+msgid "View table and stats"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:29
+msgid "Metrics"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:30
+msgid "Top scorers & records"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:36
+msgid "Danger Zone"
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:38
+msgid "Are you sure? This will replace existing matches."
+msgstr ""
+
+#: app/templates/tournament_dashboard.html:39
+msgid "Generate Round Robin Schedule"
+msgstr ""
+

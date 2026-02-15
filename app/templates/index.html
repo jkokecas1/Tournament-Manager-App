@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>{{ _('Available Tournaments') }}</h2>
+        <form action="{{ url_for('main.index') }}" method="get" style="display: flex; gap: 10px; margin-bottom: 0;">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="{{ _('Search tournament...') }}"
+                style="margin-bottom: 0; width: 250px;">
+            <button type="submit" class="btn btn-secondary">{{ _('Search') }}</button>
+            {% if search_query %}
+            <a href="{{ url_for('main.index') }}" class="btn btn-danger" style="text-decoration: none;">&times;</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if tournaments %}
+    <div class="grid">
+        {% for t in tournaments %}
+        <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}" class="card"
+            style="text-decoration: none; color: inherit; border-left: 5px solid #2ecc71;">
+            <h3>🏆 {{ t.name }}</h3>
+            <p>{{ _('Category') }}: {{ t.category }}</p>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <div style="margin-top: 30px; display: flex; justify-content: center; gap: 10px; align-items: center;">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('main.index', page=pagination.prev_num, q=search_query) }}"
+            class="btn btn-secondary">&laquo; {{
+            _('Previous') }}</a>
+        {% endif %}
+
+        <span style="color: #666;">{{ _('Page') }} {{ pagination.page }} {{ _('of') }} {{ pagination.pages }}</span>
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for('main.index', page=pagination.next_num, q=search_query) }}" class="btn btn-secondary">{{
+            _('Next') }} &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p style="text-align: center; color: #7f8c8d; padding: 40px;">{{ _('No tournaments found matching your search.') }}
+    </p>
+    {% endif %}
+</div>
+
+{% if current_user and current_user.role == 'admin' %}
+<div class="card" style="margin-top: 20px;">
+    <h3>{{ _('Create New Tournament') }}</h3>
+    <form action="{{ url_for('tournaments.create_tournament') }}" method="post">
+        <input type="text" name="name" placeholder="{{ _('Tournament Name') }}" required>
+        <input type="text" name="category" placeholder="{{ _('Category (e.g., U12)') }}" required>
+
+        <h4>{{ _('Points System') }}</h4>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" name="win_points" value="3" placeholder="{{ _('Win') }}" style="width: 80px;">
+            <input type="number" name="draw_points" value="1" placeholder="{{ _('Draw') }}" style="width: 80px;">
+            <input type="number" name="loss_points" value="0" placeholder="{{ _('Loss') }}" style="width: 80px;">
+        </div>
+
+        <button type="submit" class="btn">{{ _('Create Tournament') }}</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

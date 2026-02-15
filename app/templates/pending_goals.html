@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ _('⚽ Pending Goal Assignments') }}</h2>
+
+<div class="card" style="margin-top: 20px;">
+    {% if not pending %}
+    <p>{{ _('You have no pending goals to assign. Great job!') }}</p>
+    {% else %}
+    <p>{{ _('The following matches had an opponent withdraw. You must assign 3 goals per match to your players.') }}</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                <th style="padding: 12px; text-align: left;">{{ _('Match') }}</th>
+                <th style="padding: 12px; text-align: left;">{{ _('Goals Pending') }}</th>
+                <th style="padding: 12px; text-align: left;">{{ _('Assign to Player') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in pending %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px;">
+                    <strong>{{ p.match.home_team.name }} vs {{ p.match.away_team.name }}</strong><br>
+                    <small>{{ _('Matchday') }} {{ p.match.matchday }}</small>
+                </td>
+                <td style="padding: 12px;">
+                    <span class="badge"
+                        style="background: #e67e22; color: white; padding: 5px 10px; border-radius: 15px;">
+                        {{ p.count - p.assigned_count }} / {{ p.count }}
+                    </span>
+                </td>
+                <td style="padding: 12px;">
+                    <form action="{{ url_for('tournaments.assign_goal') }}" method="post"
+                        style="display: flex; gap: 10px; align-items: center;">
+                        <input type="hidden" name="pending_id" value="{{ p.id }}">
+                        <select name="player_id" required
+                            style="flex: 1; padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
+                            <option value="">-- {{ _('Select Player') }} --</option>
+                            {% for player in p.team.players %}
+                            <option value="{{ player.id }}">{{ player.number }} - {{ player.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn" style="padding: 5px 15px;">{{ _('Assign Goal') }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">{{ _('Back to Home') }}</a>
+</div>
+
+{% endblock %}

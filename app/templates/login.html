@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 50px auto;">
+    <h2>{{ _('Login') }}</h2>
+    <form action="{{ url_for('auth.login') }}" method="post">
+        {% if request.args.get('next') %}
+        <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+        {% endif %}
+
+        <label>{{ _('Username') }}</label>
+        <input type="text" name="username" required>
+
+        <label>{{ _('Password') }}</label>
+        <input type="password" name="password" required
+            style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+
+        <button type="submit" class="btn" style="width: 100%;">{{ _('Login') }}</button>
+    </form>
+</div>
+{% endblock %}
