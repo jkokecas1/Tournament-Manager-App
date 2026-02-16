@@ -23,6 +23,65 @@ def create_tournament():
         db.session.commit()
     return redirect(url_for('main.index'))
 
+@tournaments_bp.route('/t/<int:t_id>/archive', methods=['POST'])
+@admin_required
+def archive_tournament(t_id):
+    t = db.session.get(Tournament, t_id)
+    if not t: return redirect(url_for('main.index'))
+    
+    # 1. Mark current as inactive
+    t.is_active = False
+    
+    # 2. Check if we want to create a new season
+    create_new = request.form.get('create_new_season') == 'yes'
+    
+    if create_new:
+        new_season_name = request.form.get('new_season_name')
+        # Create new tournament
+        new_t = Tournament(
+            name=t.name, 
+            category=t.category,
+            win_points=t.win_points,
+            draw_points=t.draw_points,
+            loss_points=t.loss_points,
+            season=new_season_name,
+            is_active=True
+        )
+        db.session.add(new_t)
+        db.session.flush() # Get ID for new_t
+        
+        # Clone teams
+        for team in t.teams:
+            # Only active teams? Or all? Let's clone all for history sake or just active.
+            # Assuming we clone all.
+            new_team = Team(
+                name=team.name,
+                logo=team.logo,
+                logo_data=team.logo_data,
+                logo_mimetype=team.logo_mimetype,
+                tournament_id=new_t.id,
+                is_active=True # Reset to active in new season
+            )
+            db.session.add(new_team)
+            
+            # Clone players? Usually yes.
+            for player in team.players:
+                new_player = Player(
+                    name=player.name,
+                    number=player.number,
+                    position=player.position,
+                    team=new_team # Link to new team object (SQLAlchemy handles ID)
+                )
+                db.session.add(new_player)
+                
+        db.session.commit()
+        flash(f"Tournament archived. New season '{new_season_name}' created!")
+        return redirect(url_for('tournaments.tournament_dashboard', t_id=new_t.id))
+        
+    db.session.commit()
+    flash("Tournament archived.")
+    return redirect(url_for('main.index'))
+
 @tournaments_bp.route('/t/<int:t_id>/')
 def tournament_dashboard(t_id):
     t = db.session.get(Tournament, t_id)
@@ -34,6 +93,97 @@ def tournament_teams(t_id):
     t = db.session.get(Tournament, t_id)
     if not t: return redirect(url_for('main.index'))
     return render_template('teams.html', t=t)
+
+@tournaments_bp.route('/t/<int:t_id>/team/<int:team_id>/delete', methods=['POST'])
+@admin_required
+def delete_team(t_id, team_id):
+    team = db.session.get(Team, team_id)
+    if not team:
+        flash("Team not found.")
+        return redirect(url_for('tournaments.tournament_teams', t_id=t_id))
+        
+    # Check for matches
+    match_count = Match.query.filter(
+        (Match.home_team_id == team_id) | (Match.away_team_id == team_id)
+    ).count()
+    
+    if match_count > 0:
+        flash(f"Cannot delete team: It has {match_count} scheduled or played matches. Remove matches first or withdraw the team.")
+        return redirect(url_for('tournaments.tournament_teams', t_id=t_id))
+        
+    try:
+        db.session.delete(team)
+        db.session.commit()
+        flash("Team deleted successfully.")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting team: {e}")
+        
+    return redirect(url_for('tournaments.tournament_teams', t_id=t_id))
+
+@tournaments_bp.route('/t/<int:t_id>/simulate_season', methods=['POST'])
+@admin_required
+def simulate_season(t_id):
+    import random
+    
+    t = db.session.get(Tournament, t_id)
+    if not t:
+        flash("Tournament not found.")
+        return redirect(url_for('main.index'))
+    
+    # Get all unplayed matches
+    matches = Match.query.filter_by(tournament_id=t_id, played=False).all()
+    
+    if not matches:
+        flash("No unplayed matches to simulate.")
+        return redirect(url_for('tournaments.tournament_dashboard', t_id=t_id))
+    
+    # Simulate each match with random scores
+    for match in matches:
+        match.home_score = random.randint(0, 5)
+        match.away_score = random.randint(0, 5)
+        match.played = True
+    
+    db.session.commit()
+    flash(f"Season simulated! {len(matches)} matches completed with random scores.")
+    return redirect(url_for('tournaments.tournament_dashboard', t_id=t_id))
+
+
+@tournaments_bp.route('/t/<int:t_id>/match/<int:match_id>/walkover', methods=['POST'])
+@admin_required
+def mark_walkover(t_id, match_id):
+    match = db.session.get(Match, match_id)
+    if not match or match.tournament_id != t_id:
+        flash("Match not found.")
+        return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+    
+    if match.played:
+        flash("Cannot mark played match as walkover.")
+        return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+    
+    # Get winning team from form (home or away)
+    winner = request.form.get('winner')  # 'home' or 'away'
+    
+    if winner == 'home':
+        match.home_score = 3
+        match.away_score = 0
+        winning_team_id = match.home_team_id
+    elif winner == 'away':
+        match.home_score = 0
+        match.away_score = 3
+        winning_team_id = match.away_team_id
+    else:
+        flash("Invalid winner selection.")
+        return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+    
+    match.played = True
+    db.session.commit()
+    
+    flash(f"Match marked as walkover (3-0). Assign goals to players if needed.")
+    return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+
+
+
 
 @tournaments_bp.route('/upload_logo', methods=['POST'])
 @admin_or_rep_required
@@ -190,10 +340,15 @@ def tournament_schedule(t_id):
     max_matchday = max(matchdays) if matchdays else 1
 
     matchday_filter = request.args.get('matchday')
-    if matchday_filter and matchday_filter.isdigit():
+    if matchday_filter is None:
+        # Default to min_matchday on first load
+        matchday_filter = min_matchday
+        query = query.filter_by(matchday=matchday_filter)
+    elif matchday_filter.isdigit():
         matchday_filter = int(matchday_filter)
         query = query.filter_by(matchday=matchday_filter)
     else:
+        # User explicitly selected "All Matchdays" (empty string)
         matchday_filter = None
         
     team_filter = request.args.get('team_id')
@@ -418,3 +573,55 @@ def assign_goal():
         flash("Goal assigned successfully.")
     
     return redirect(url_for('tournaments.pending_goals'))
+
+@tournaments_bp.route('/t/<int:t_id>/match/<int:m_id>/change_matchday', methods=['POST'])
+@admin_required
+def change_matchday(t_id, m_id):
+    match = db.session.get(Match, m_id)
+    
+    if not match:
+        flash("Match not found.")
+        return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+    
+    # Validate match belongs to tournament
+    if match.tournament_id != t_id:
+        flash("Invalid match.")
+        return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+    
+    # Don't allow changing played matches
+    if match.played:
+        flash("Cannot reschedule a match that has already been played.")
+        return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))
+    
+    new_matchday = request.form.get('new_matchday', type=int)
+    
+    if new_matchday and new_matchday > 0:
+        old_matchday = match.matchday
+        
+        # SMART SWAP: Find matches in the destination matchday involving these teams
+        conflicting_matches = Match.query.filter(
+            Match.tournament_id == t_id,
+            Match.matchday == new_matchday,
+            (Match.home_team_id.in_([match.home_team_id, match.away_team_id])) |
+            (Match.away_team_id.in_([match.home_team_id, match.away_team_id]))
+        ).all()
+        
+        swapped_count = 0
+        # Move conflicting matches to the old matchday
+        for conflict in conflicting_matches:
+            if not conflict.played and conflict.id != match.id:
+                conflict.matchday = old_matchday
+                swapped_count += 1
+        
+        # Move the requested match to the new matchday
+        match.matchday = new_matchday
+        db.session.commit()
+        
+        if swapped_count > 0:
+            flash(f"Match rescheduled to Matchday {new_matchday}. {swapped_count} conflicting matches moved to Matchday {old_matchday}.")
+        else:
+            flash(f"Match rescheduled to Matchday {new_matchday} successfully.")
+    else:
+        flash("Invalid matchday number.")
+    
+    return redirect(url_for('tournaments.tournament_schedule', t_id=t_id))

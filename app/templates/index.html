@@ -2,14 +2,39 @@
 
 {% block content %}
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>{{ _('Available Tournaments') }}</h2>
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <h2>
+                {% if show_history %}
+                {{ _('Archived Tournaments') }}
+                {% else %}
+                {{ _('Available Tournaments') }}
+                {% endif %}
+            </h2>
+
+            {% if show_history %}
+            <a href="{{ url_for('main.index', q=search_query) }}" class="btn btn-secondary" style="font-size: 0.9em;">
+                ⬅️ {{ _('View Active') }}
+            </a>
+            {% else %}
+            <a href="{{ url_for('main.index', history='true', q=search_query) }}" class="btn btn-secondary"
+                style="font-size: 0.9em; background-color: #95a5a6;">
+                📜 {{ _('View History') }}
+            </a>
+            {% endif %}
+        </div>
+
         <form action="{{ url_for('main.index') }}" method="get" style="display: flex; gap: 10px; margin-bottom: 0;">
+            {% if show_history %}
+            <input type="hidden" name="history" value="true">
+            {% endif %}
             <input type="text" name="q" value="{{ search_query }}" placeholder="{{ _('Search tournament...') }}"
                 style="margin-bottom: 0; width: 250px;">
             <button type="submit" class="btn btn-secondary">{{ _('Search') }}</button>
             {% if search_query %}
-            <a href="{{ url_for('main.index') }}" class="btn btn-danger" style="text-decoration: none;">&times;</a>
+            <a href="{{ url_for('main.index', history=show_history) }}" class="btn btn-danger"
+                style="text-decoration: none;">&times;</a>
             {% endif %}
         </form>
     </div>

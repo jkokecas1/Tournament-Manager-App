@@ -23,22 +23,23 @@ def unauthorized(e):
 @main_bp.route('/')
 def index():
     search_query = request.args.get('q', '')
+    show_history = request.args.get('history') == 'true'
     page = request.args.get('page', 1, type=int)
     per_page = 6
     
     query = Tournament.query
     
     if search_query:
-        query = query.filter(Tournament.name.ilike(f'%{search_query}%'))
+        query = query.filter(Tournament.name.contains(search_query))
         
-    if 'user_id' in session:
-        user = db.session.get(User, session['user_id'])
-        if user and user.role == 'rep' and user.team_id:
-            team = db.session.get(Team, user.team_id)
-            if team:
-                query = query.filter(Tournament.id == team.tournament_id)
-
+    if show_history:
+        query = query.filter(Tournament.is_active == False)
+    else:
+        query = query.filter(Tournament.is_active == True)
+        
     pagination = query.order_by(Tournament.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
     tournaments = pagination.items
-        
-    return render_template('index.html', tournaments=tournaments, pagination=pagination, search_query=search_query)
+    
+    return render_template('index.html', tournaments=tournaments, pagination=pagination, search_query=search_query, show_history=show_history)
+    
+

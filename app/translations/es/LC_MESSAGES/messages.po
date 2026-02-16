@@ -570,3 +570,179 @@ msgstr "Generar Calendario Round Robin"
 #~ msgid "Create Tournament"
 #~ msgstr "Crear Torneo"
 
+msgid "Delete Team"
+msgstr "Eliminar Equipo"
+
+msgid "Are you sure? This will delete the team and all its players."
+msgstr "¿Estás seguro? Esto eliminará el equipo y todos sus jugadores."
+
+msgid "Simulate Season"
+msgstr "Simular Temporada"
+
+msgid "This will complete ALL unplayed matches with random scores. Continue?"
+msgstr "Esto completará TODOS los partidos pendientes con resultados aleatorios. ¿Continuar?"
+
+msgid "End Season / Archive"
+msgstr "Finalizar Temporada / Archivar"
+
+msgid "Danger Zone"
+msgstr "Zona de Peligro"
+
+msgid "End Season & Archive"
+msgstr "Finalizar Temporada y Archivar"
+
+msgid "This will mark the current tournament as INACTIVE and move it to history."
+msgstr "Esto marcará el torneo actual como INACTIVO y lo moverá al historial."
+
+msgid "Start New Season?"
+msgstr "¿Iniciar Nueva Temporada?"
+
+msgid "Yes, start new season"
+msgstr "Sí, iniciar nueva temporada"
+
+msgid "No, just archive"
+msgstr "No, solo archivar"
+
+msgid "New Season Name"
+msgstr "Nombre de la Nueva Temporada"
+
+msgid "Confirm Archive"
+msgstr "Confirmar Archivo"
+
+msgid "Archived Tournaments"
+msgstr "Torneos Archivados"
+
+msgid "View Active"
+msgstr "Ver Activos"
+
+msgid "View History"
+msgstr "Ver Historial"
+
+msgid "Generate Round Robin Schedule"
+msgstr "Generar Calendario Round Robin"
+
+msgid "Are you sure? This will replace existing matches."
+msgstr "¿Estás seguro? Esto reemplazará los partidos existentes."
+
+msgid "Are you sure you want to withdraw this team? This will set all matches to 3-0."
+msgstr "¿Estás seguro de que quieres retirar este equipo? Esto establecerá todos los partidos a 3-0."
+
+msgid "Walkover"
+msgstr "W.O."
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Mark Match as Walkover"
+msgstr "Marcar Partido como W.O."
+
+msgid "Select the team that WINS by walkover. The match will be marked as 3-0."
+msgstr "Selecciona el equipo que GANA por W.O. El partido se marcará como 3-0."
+
+msgid "Winning Team:"
+msgstr "Equipo Ganador:"
+
+msgid "Confirm Walkover"
+msgstr "Confirmar W.O."
+
+msgid "Manage all system users, roles, and bulk generate team representatives."
+msgstr "Gestionar todos los usuarios del sistema, roles y generar representantes de equipos masivamente."
+
+msgid "Go to User Manager"
+msgstr "Ir al Gestor de Usuarios"
+
+msgid "Tournament Management"
+msgstr "Gestión de Torneos"
+
+msgid "Manage all tournaments, create new ones, and access tournament dashboards."
+msgstr "Gestionar todos los torneos, crear nuevos y acceder a paneles de torneos."
+
+msgid "Go to Tournament Manager"
+msgstr "Ir al Gestor de Torneos"
+
+msgid "Back to Admin"
+msgstr "Volver a Administración"
+
+msgid "➕ Create New Tournament"
+msgstr "➕ Crear Nuevo Torneo"
+
+msgid "e.g., Summer League 2026"
+msgstr "ej., Liga de Verano 2026"
+
+msgid "e.g., U12, Open, Women"
+msgstr "ej., Sub-12, Abierto, Femenil"
+
+msgid "Create Tournament"
+msgstr "Crear Torneo"
+
+msgid "📜 All Tournaments"
+msgstr "📜 Todos los Torneos"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Archived"
+msgstr "Archivado"
+
+msgid "Active"
+msgstr "Activo"
+
+msgid "No tournaments found. Create your first tournament above!"
+msgstr "No se encontraron torneos. ¡Crea tu primer torneo arriba!"
+
+msgid "➕ Create User"
+msgstr "➕ Crear Usuario"
+
+msgid "📜 All Users"
+msgstr "📜 Todos los Usuarios"
+
+msgid "🤖 Bulk Generation"
+msgstr "🤖 Generación Masiva"
+
+msgid "Generate a representative user for every team that doesn't have one yet."
+msgstr "Generar un usuario representante para cada equipo que aún no tenga uno."
+
+msgid "Generate Team Users"
+msgstr "Generar Usuarios de Equipos"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Copy Username and Password"
+msgstr "Copiar Usuario y Contraseña"
+
+msgid "Credentials copied to clipboard for"
+msgstr "Credenciales copiadas al portapapeles para"
+
+msgid "Assign Team (For Reps):"
+msgstr "Asignar Equipo (Para Representantes):"
+
+msgid "Show Archived"
+msgstr "Mostrar Archivados"
+
+msgid "Reschedule"
+msgstr "Reprogramar"
+
+msgid "Reschedule Match"
+msgstr "Reprogramar Partido"
+
+msgid "Current Matchday:"
+msgstr "Jornada Actual:"
+
+msgid "New Matchday:"
+msgstr "Nueva Jornada:"
+
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgid "Match rescheduled successfully"
+msgstr "Partido reprogramado exitosamente"
+
+msgid "Cannot reschedule a match that has already been played"
+msgstr "No se puede reprogramar un partido que ya se ha jugado"
+
+msgid "Invalid matchday number"
+msgstr "Número de jornada inválido"

@@ -71,6 +71,9 @@
                 <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Matchday') }}</th>
                 <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">{{ _('Match') }}</th>
                 <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Result') }}</th>
+                {% if current_user and current_user.role == 'admin' %}
+                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Actions') }}</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -103,6 +106,19 @@
                     -
                     {% endif %}
                 </td>
+                {% if current_user and current_user.role == 'admin' %}
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                    {% if not match.played %}
+                    <button
+                        onclick="openWalkoverModal({{ match.id }}, '{{ match.home_team.name }}', '{{ match.away_team.name }}')"
+                        class="btn" style="background-color: #f39c12; font-size: 0.8em; padding: 5px 10px;">
+                        ⚠️ {{ _('Walkover') }}
+                    </button>
+                    {% else %}
+                    <span style="color: #95a5a6;">-</span>
+                    {% endif %}
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
@@ -231,6 +247,14 @@
                     style="padding: 5px 10px; font-size: 0.8em;">
                     {% if match.played %}{{ _('Edit') }}{% else %}{{ _('Update') }}{% endif %}
                 </a>
+                {% if current_user.role == 'admin' and not match.played %}
+                <button
+                    onclick="openChangeMatchdayModal({{ match.id }}, {{ match.matchday }}, '{{ match.home_team.name }}', '{{ match.away_team.name }}')"
+                    class="btn"
+                    style="background-color: #3498db; font-size: 0.8em; padding: 5px 10px; margin-left: 5px;">
+                    🔄 {{ _('Reschedule') }}
+                </button>
+                {% endif %}
             </td>
             {% endif %}
         </tr>
@@ -333,6 +357,150 @@
         if (e.target === this) {
             closeModal();
         }
+    });
+</script>
+
+<!-- Walkover Modal -->
+<div id="walkoverModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
+        <h3 style="margin-top: 0; color: #2c3e50;">⚠️ {{ _('Mark Match as Walkover') }}</h3>
+        <p style="color: #7f8c8d; margin-bottom: 20px;">
+            {{ _('Select the team that WINS by walkover. The match will be marked as 3-0.') }}
+        </p>
+
+        <form id="walkoverForm" method="post">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                    {{ _('Winning Team:') }}
+                </label>
+                <div style="display: flex; gap: 15px; flex-direction: column;">
+                    <label
+                        style="padding: 15px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="winner" value="home" required style="width: 20px; height: 20px;">
+                        <span id="homeTeamName" style="font-weight: bold; font-size: 1.1em;"></span>
+                    </label>
+                    <label
+                        style="padding: 15px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="winner" value="away" required style="width: 20px; height: 20px;">
+                        <span id="awayTeamName" style="font-weight: bold; font-size: 1.1em;"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeWalkoverModal()" class="btn" style="background-color: #95a5a6;">
+                    {{ _('Cancel') }}
+                </button>
+                <button type="submit" class="btn" style="background-color: #f39c12;">
+                    {{ _('Confirm Walkover') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentMatchId = null;
+
+    function openWalkoverModal(matchId, homeTeam, awayTeam) {
+        currentMatchId = matchId;
+        document.getElementById('homeTeamName').textContent = homeTeam;
+        document.getElementById('awayTeamName').textContent = awayTeam;
+        document.getElementById('walkoverModal').style.display = 'flex';
+    }
+
+    function closeWalkoverModal() {
+        document.getElementById('walkoverModal').style.display = 'none';
+        document.getElementById('walkoverForm').reset();
+        currentMatchId = null;
+    }
+
+    document.getElementById('walkoverForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const winner = document.querySelector('input[name="winner"]:checked').value;
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = `/t/{{ t.id }}/match/${currentMatchId}/walkover`;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'winner';
+        input.value = winner;
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
+    });
+</script>
+
+<!-- Change Matchday Modal -->
+<div id="changeMatchdayModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%;">
+        <h3 style="margin-top: 0; color: #2c3e50;">🔄 {{ _('Reschedule Match') }}</h3>
+        <p style="color: #7f8c8d; margin-bottom: 15px;">
+            <strong id="matchInfo"></strong>
+        </p>
+        <p style="color: #7f8c8d; margin-bottom: 20px; font-size: 0.9em;">
+            {{ _('Current Matchday:') }} <strong id="currentMatchday"></strong>
+        </p>
+
+        <form id="changeMatchdayForm" method="post">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                    {{ _('New Matchday:') }}
+                </label>
+                <input type="number" name="new_matchday" id="newMatchdayInput" min="1" required
+                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1.1em;">
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeChangeMatchdayModal()" class="btn"
+                    style="background-color: #95a5a6;">
+                    {{ _('Cancel') }}
+                </button>
+                <button type="submit" class="btn" style="background-color: #3498db;">
+                    {{ _('Confirm') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentChangeMatchId = null;
+
+    function openChangeMatchdayModal(matchId, currentMatchday, homeTeam, awayTeam) {
+        currentChangeMatchId = matchId;
+        document.getElementById('matchInfo').textContent = homeTeam + ' vs ' + awayTeam;
+        document.getElementById('currentMatchday').textContent = currentMatchday;
+        document.getElementById('changeMatchdayModal').style.display = 'flex';
+        document.getElementById('newMatchdayInput').value = '';
+        document.getElementById('newMatchdayInput').focus();
+    }
+
+    function closeChangeMatchdayModal() {
+        document.getElementById('changeMatchdayModal').style.display = 'none';
+        document.getElementById('changeMatchdayForm').reset();
+        currentChangeMatchId = null;
+    }
+
+    document.getElementById('changeMatchdayForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const newMatchday = document.getElementById('newMatchdayInput').value;
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = `/t/{{ t.id }}/match/${currentChangeMatchId}/change_matchday`;
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'new_matchday';
+        input.value = newMatchday;
+        form.appendChild(input);
+
+        document.body.appendChild(form);
+        form.submit();
     });
 </script>
 {% endblock %}

@@ -15,6 +15,8 @@ class Tournament(db.Model):
     win_points = db.Column(db.Integer, default=3)
     draw_points = db.Column(db.Integer, default=1)
     loss_points = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    season = db.Column(db.String(50), nullable=True)
     teams = db.relationship('Team', backref='tournament', lazy=True, cascade="all, delete-orphan")
     matches = db.relationship('Match', backref='tournament', lazy=True, cascade="all, delete-orphan")
 

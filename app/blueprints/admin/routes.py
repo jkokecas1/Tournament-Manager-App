@@ -20,8 +20,13 @@ def admin_panel():
     from app.models import Match
     stats['match_count'] = Match.query.count()
     
+    return render_template('admin.html', stats=stats)
+
+@admin_bp.route('/admin/tournaments')
+@admin_required
+def manage_tournaments():
     tournaments = Tournament.query.all()
-    return render_template('admin.html', tournaments=tournaments, stats=stats)
+    return render_template('tournaments_management.html', tournaments=tournaments)
 
 @admin_bp.route('/admin/users', methods=['GET', 'POST'])
 @admin_required

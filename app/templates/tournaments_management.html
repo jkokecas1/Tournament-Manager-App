@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>{{ _('🏆 Tournament Management') }}</h2>
+    <div style="display: flex; gap: 15px; align-items: center;">
+        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+            <input type="checkbox" id="showArchived" onchange="toggleArchivedTournaments()">
+            <span>{{ _('Show Archived') }}</span>
+        </label>
+        <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-secondary">{{ _('Back to Admin') }}</a>
+    </div>
+</div>
+
+<div class="grid">
+    <!-- Create Tournament Form -->
+    <div class="card">
+        <h3>{{ _('➕ Create New Tournament') }}</h3>
+        <form action="{{ url_for('tournaments.create_tournament') }}" method="post">
+            <label>{{ _('Tournament Name') }}</label>
+            <input type="text" name="name" placeholder="{{ _('e.g., Summer League 2026') }}" required>
+
+            <label>{{ _('Category') }}</label>
+            <input type="text" name="category" placeholder="{{ _('e.g., U12, Open, Women') }}" required>
+
+            <button type="submit" class="btn">{{ _('Create Tournament') }}</button>
+        </form>
+    </div>
+
+    <!-- Tournament List -->
+    <div class="card" style="grid-column: span 2;">
+        <h3>{{ _('📜 All Tournaments') }}</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{ _('Name') }}</th>
+                        <th>{{ _('Category') }}</th>
+                        <th>{{ _('Teams') }}</th>
+                        <th>{{ _('Status') }}</th>
+                        <th>{{ _('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tournaments %}
+                    <tr class="tournament-row" data-active="{{ 'true' if t.is_active else 'false' }}"
+                        style="{{ 'display: none;' if not t.is_active else '' }}">
+                        <td><strong>{{ t.name }}</strong></td>
+                        <td><span class="badge">{{ t.category }}</span></td>
+                        <td>{{ t.teams|length }}</td>
+                        <td>
+                            {% if t.is_active %}
+                            <span class="badge active">{{ _('Active') }}</span>
+                            {% else %}
+                            <span class="badge archived">{{ _('Archived') }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}"
+                                class="btn btn-secondary btn-sm">
+                                📊 {{ _('Dashboard') }}
+                            </a>
+                            <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}"
+                                class="btn btn-secondary btn-sm">
+                                👥 {{ _('Teams') }}
+                            </a>
+                            <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}"
+                                class="btn btn-secondary btn-sm">
+                                📅 {{ _('Schedule') }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #999;">
+                            {{ _('No tournaments found. Create your first tournament above!') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleArchivedTournaments() {
+        const showArchived = document.getElementById('showArchived').checked;
+        const tournamentRows = document.querySelectorAll('.tournament-row');
+
+        tournamentRows.forEach(row => {
+            const isActive = row.getAttribute('data-active') === 'true';
+
+            if (showArchived) {
+                // Show all tournaments
+                row.style.display = '';
+            } else {
+                // Show only active tournaments
+                row.style.display = isActive ? '' : 'none';
+            }
+        });
+    }
+</script>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        background: #eee;
+        border-radius: 12px;
+        font-size: 0.85em;
+        text-transform: capitalize;
+    }
+
+    .badge.active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge.archived {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.85em;
+        margin: 2px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

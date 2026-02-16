@@ -71,6 +71,13 @@
                 {{ _('Withdraw Team') if team.is_active else _('Team Withdrawn') }}
             </button>
         </form>
+        <form action="{{ url_for('tournaments.delete_team', t_id=t.id, team_id=team.id) }}" method="post"
+            onsubmit="return confirm('{{ _('Are you sure? This will delete the team and all its players.') }}');"
+            style="margin-top: 5px;">
+            <button type="submit" class="btn" style="background-color: #c0392b; width: 100%; font-size: 0.8em;">
+                🗑️ {{ _('Delete Team') }}
+            </button>
+        </form>
         {% endif %}
         {% endif %}
     </div>

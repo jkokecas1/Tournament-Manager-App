@@ -34,11 +34,76 @@
 {% if current_user and current_user.role == 'admin' %}
 <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
     <h3>⚠️ {{ _('Danger Zone') }}</h3>
-    <form action="{{ url_for('tournaments.generate_schedule', t_id=t.id) }}" method="post"
-        onsubmit="return confirm('{{ _('Are you sure? This will replace existing matches.') }}');">
-        <button type="submit" class="btn" style="background-color: #e74c3c;">🔄 {{ _('Generate Round Robin Schedule')
-            }}</button>
-    </form>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <form action="{{ url_for('tournaments.generate_schedule', t_id=t.id) }}" method="post"
+            onsubmit="return confirm('{{ _('Are you sure? This will replace existing matches.') }}');">
+            <button type="submit" class="btn" style="background-color: #e74c3c;">🔄 {{ _('Generate Round Robin
+                Schedule') }}</button>
+        </form>
+
+        <form action="{{ url_for('tournaments.simulate_season', t_id=t.id) }}" method="post"
+            onsubmit="return confirm('{{ _('This will complete ALL unplayed matches with random scores. Continue?') }}');">
+            <button type="submit" class="btn" style="background-color: #9b59b6;">⚡ {{ _('Simulate Season') }}</button>
+        </form>
+
+        <button onclick="openArchiveModal()" class="btn" style="background-color: #7f8c8d;">
+            📂 {{ _('End Season / Archive') }}
+        </button>
+    </div>
 </div>
+
+<!-- Archive Modal -->
+<div id="archiveModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%;">
+        <h3 style="color: #c0392b; margin-top: 0;">{{ _('End Season & Archive') }}</h3>
+        <p>{{ _('This will mark the current tournament as INACTIVE and move it to history.') }}</p>
+
+        <form action="{{ url_for('tournaments.archive_tournament', t_id=t.id) }}" method="POST">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ _('Start New Season?')
+                    }}</label>
+                <select name="create_new_season" id="createNewSeason" onchange="toggleSeasonName()"
+                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="yes">{{ _('Yes, start new season') }}</option>
+                    <option value="no">{{ _('No, just archive') }}</option>
+                </select>
+            </div>
+
+            <div id="seasonNameContainer" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px;">{{ _('New Season Name') }}</label>
+                <input type="text" name="new_season_name" placeholder="e.g., Spring 2025"
+                    style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="button" onclick="closeArchiveModal()" class="btn"
+                    style="background-color: #95a5a6; margin-right: 10px;">{{ _('Cancel') }}</button>
+                <button type="submit" class="btn" style="background-color: #e74c3c;">{{ _('Confirm Archive') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openArchiveModal() {
+        document.getElementById('archiveModal').style.display = 'flex';
+    }
+
+    function closeArchiveModal() {
+        document.getElementById('archiveModal').style.display = 'none';
+    }
+
+    function toggleSeasonName() {
+        var val = document.getElementById('createNewSeason').value;
+        var container = document.getElementById('seasonNameContainer');
+        if (val === 'yes') {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+            container.querySelector('input').value = '';
+        }
+    }
+</script>
 {% endif %}
 {% endblock %}
