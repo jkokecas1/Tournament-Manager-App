@@ -1,79 +1,102 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2>{{ _('🏆 Tournament Management') }}</h2>
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ _('🏆 Gestión de Torneos') }}</h2>
     <div style="display: flex; gap: 15px; align-items: center;">
-        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-            <input type="checkbox" id="showArchived" onchange="toggleArchivedTournaments()">
-            <span>{{ _('Show Archived') }}</span>
+        <a href="{{ url_for('admin.manage_categories') }}" class="btn btn-secondary"
+            style="font-size: 0.9em; padding: 8px 15px; border-radius: 8px;">
+            🏷️ {{ _('Gestionar Categorías') }}
+        </a>
+        <label
+            style="display: flex; align-items: center; gap: 8px; cursor: pointer; background: #f8f9fa; padding: 8px 15px; border-radius: 8px; font-size: 0.9em; border: 1px solid #dee2e6;">
+            <input type="checkbox" id="showArchived" onchange="toggleArchivedTournaments()"
+                style="margin: 0; width: 18px; height: 18px;">
+            <span style="font-weight: 500; color: #495057;">{{ _('Mostrar Archivados') }}</span>
         </label>
-        <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-secondary">{{ _('Back to Admin') }}</a>
     </div>
 </div>
 
-<div class="grid">
+<div class="grid" style="grid-template-columns: 1fr 2.5fr; gap: 30px;">
     <!-- Create Tournament Form -->
-    <div class="card">
-        <h3>{{ _('➕ Create New Tournament') }}</h3>
+    <div class="card" id="create-form" style="height: fit-content; position: sticky; top: 20px;">
+        <h3 style="margin-top: 0;">{{ _('➕ Crear Nuevo Torneo') }}</h3>
         <form action="{{ url_for('tournaments.create_tournament') }}" method="post">
-            <label>{{ _('Tournament Name') }}</label>
-            <input type="text" name="name" placeholder="{{ _('e.g., Summer League 2026') }}" required>
+            <label style="font-weight: 600;">{{ _('Nombre del Torneo') }}</label>
+            <input type="text" name="name" placeholder="{{ _('ej. Liga de Verano 2026') }}" required>
 
-            <label>{{ _('Category') }}</label>
-            <input type="text" name="category" placeholder="{{ _('e.g., U12, Open, Women') }}" required>
+            <label style="font-weight: 600;">{{ _('Categoría') }}</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <select name="category_id" style="flex: 1;">
+                    <option value="">-- {{ _('Seleccionar Categoría') }} --</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <p style="font-size: 0.8em; color: #6c757d; margin: -5px 0 10px 0;">
+                {{ _('¿No ves la categoría? Añádela en "Gestionar Categorías"') }}
+            </p>
 
-            <button type="submit" class="btn">{{ _('Create Tournament') }}</button>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">{{ _('Crear Torneo') }}</button>
         </form>
     </div>
 
     <!-- Tournament List -->
-    <div class="card" style="grid-column: span 2;">
-        <h3>{{ _('📜 All Tournaments') }}</h3>
+    <div class="card">
+        <h3 style="margin-top: 0;">{{ _('📜 Todos los Torneos') }}</h3>
         <div style="overflow-x: auto;">
-            <table>
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>{{ _('Name') }}</th>
-                        <th>{{ _('Category') }}</th>
-                        <th>{{ _('Teams') }}</th>
-                        <th>{{ _('Status') }}</th>
-                        <th>{{ _('Actions') }}</th>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Nombre') }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Categoría') }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: center;">{{ _('Equipos')
+                            }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Estado') }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: right;">{{ _('Acciones')
+                            }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for t in tournaments %}
                     <tr class="tournament-row" data-active="{{ 'true' if t.is_active else 'false' }}"
                         style="{{ 'display: none;' if not t.is_active else '' }}">
-                        <td><strong>{{ t.name }}</strong></td>
-                        <td><span class="badge">{{ t.category }}</span></td>
-                        <td>{{ t.teams|length }}</td>
-                        <td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;"><strong>{{ t.name }}</strong></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <span class="badge-cat">{{ t.category_rel.name if t.category_rel else t.category }}</span>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">
+                            <span style="font-weight: 600; color: var(--augment);">{{ t.teams|length }}</span>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
                             {% if t.is_active %}
-                            <span class="badge active">{{ _('Active') }}</span>
+                            <span class="status-badge active">{{ _('Activo') }}</span>
                             {% else %}
-                            <span class="badge archived">{{ _('Archived') }}</span>
+                            <span class="status-badge archived">{{ _('Archivado') }}</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td
+                            style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; white-space: nowrap;">
                             <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}"
-                                class="btn btn-secondary btn-sm">
-                                📊 {{ _('Dashboard') }}
+                                class="btn btn-secondary btn-sm" title="{{ _('Panel de Control') }}">
+                                📊
                             </a>
                             <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}"
-                                class="btn btn-secondary btn-sm">
-                                👥 {{ _('Teams') }}
+                                class="btn btn-secondary btn-sm" title="{{ _('Equipos') }}">
+                                👥
                             </a>
                             <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}"
-                                class="btn btn-secondary btn-sm">
-                                📅 {{ _('Schedule') }}
+                                class="btn btn-secondary btn-sm" title="{{ _('Calendario') }}">
+                                📅
                             </a>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #999;">
-                            {{ _('No tournaments found. Create your first tournament above!') }}
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #adb5bd;">
+                            <div style="font-size: 3em; margin-bottom: 10px;">🏆</div>
+                            {{ _('No se encontraron torneos. ¡Crea tu primer torneo a la izquierda!') }}
                         </td>
                     </tr>
                     {% endfor %}
@@ -90,59 +113,55 @@
 
         tournamentRows.forEach(row => {
             const isActive = row.getAttribute('data-active') === 'true';
-
-            if (showArchived) {
-                // Show all tournaments
-                row.style.display = '';
-            } else {
-                // Show only active tournaments
-                row.style.display = isActive ? '' : 'none';
-            }
+            row.style.display = showArchived || isActive ? '' : 'none';
         });
     }
 </script>
 
 <style>
-    .badge {
+    .badge-cat {
         display: inline-block;
-        padding: 2px 8px;
-        background: #eee;
-        border-radius: 12px;
-        font-size: 0.85em;
-        text-transform: capitalize;
+        padding: 3px 10px;
+        background: #f1f3f5;
+        color: #495057;
+        border-radius: 6px;
+        font-size: 0.8em;
+        font-weight: 500;
     }
 
-    .badge.active {
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.active {
         background: #d4edda;
         color: #155724;
     }
 
-    .badge.archived {
+    .status-badge.archived {
         background: #f8d7da;
         color: #721c24;
     }
 
     .btn-sm {
-        padding: 4px 8px;
+        padding: 6px 10px;
+        font-size: 1rem;
+        margin-left: 5px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    table th {
         font-size: 0.85em;
-        margin: 2px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th,
-    td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #eee;
-    }
-
-    th {
-        background-color: #f8f9fa;
-        font-weight: bold;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 </style>
 {% endblock %}

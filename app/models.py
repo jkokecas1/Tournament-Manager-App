@@ -8,10 +8,23 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False, default='user')
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
 
+    team = db.relationship('Team', backref='representatives', lazy=True)
+
+
+class TournamentCategory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    
+    tournaments = db.relationship('Tournament', backref='category_rel', lazy=True)
+
+    def __repr__(self):
+        return f'<Category {self.name}>'
+
 class Tournament(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(50), nullable=False) # Keep for compatibility
+    category_id = db.Column(db.Integer, db.ForeignKey('tournament_category.id'), nullable=True)
     win_points = db.Column(db.Integer, default=3)
     draw_points = db.Column(db.Integer, default=1)
     loss_points = db.Column(db.Integer, default=0)
@@ -104,6 +117,8 @@ class Match(db.Model):
     played = db.Column(db.Boolean, default=False)
     tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
     referee_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    start_time = db.Column(db.Time, nullable=True)
+    end_time = db.Column(db.Time, nullable=True)
     
     events = db.relationship('MatchEvent', backref='match', lazy=True, cascade="all, delete-orphan")
     
@@ -144,4 +159,26 @@ class PendingGoalAssignment(db.Model):
     
     match = db.relationship('Match', backref='pending_goals')
     team = db.relationship('Team', backref='pending_goals')
+
+
+class TournamentPrize(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
+    rank = db.Column(db.String(50), nullable=False) # e.g., "1st Place", "Top Scorer"
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    reward_value = db.Column(db.String(100), nullable=True) # e.g., "$500", "Gold Trophy"
+
+    tournament = db.relationship('Tournament', backref=db.backref('prizes', lazy=True, cascade="all, delete-orphan"))
+
+
+class MarketingAsset(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=True)
+    type = db.Column(db.String(20), nullable=False) # 'image' or 'video'
+    filename = db.Column(db.String(200), nullable=False)
+    title = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    tournament = db.relationship('Tournament', backref=db.backref('marketing_assets', lazy=True, cascade="all, delete-orphan"))
 

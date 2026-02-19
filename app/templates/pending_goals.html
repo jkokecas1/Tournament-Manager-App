@@ -1,7 +1,10 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
-<h2>{{ _('⚽ Pending Goal Assignments') }}</h2>
+{% block layout_content %}
+<h2>
+    {{ _('⚽ Pending Goal Assignments') }}
+    {% if t %} - {{ t.name }}{% endif %}
+</h2>
 
 <div class="card" style="margin-top: 20px;">
     {% if not pending %}
@@ -21,6 +24,7 @@
             {% for p in pending %}
             <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 12px;">
+                    <strong style="color: var(--augment);">🏆 {{ p.match.tournament.name }}</strong><br>
                     <strong>{{ p.match.home_team.name }} vs {{ p.match.away_team.name }}</strong><br>
                     <small>{{ _('Matchday') }} {{ p.match.matchday }}</small>
                 </td>
@@ -34,6 +38,9 @@
                     <form action="{{ url_for('tournaments.assign_goal') }}" method="post"
                         style="display: flex; gap: 10px; align-items: center;">
                         <input type="hidden" name="pending_id" value="{{ p.id }}">
+                        {% if t %}
+                        <input type="hidden" name="t_id" value="{{ t.id }}">
+                        {% endif %}
                         <select name="player_id" required
                             style="flex: 1; padding: 5px; border-radius: 4px; border: 1px solid #ddd;">
                             <option value="">-- {{ _('Select Player') }} --</option>
@@ -51,8 +58,13 @@
     {% endif %}
 </div>
 
-<div style="margin-top: 20px;">
-    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">{{ _('Back to Home') }}</a>
+<div style="margin-top: 20px; display: flex; gap: 10px;">
+    {% if t %}
+    <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}" class="btn btn-secondary">{{ _('Back to
+        Dashboard') }}</a>
+    {% endif %}
+    <a href="{{ url_for('main.index') }}" class="btn {% if t %}btn-outline{% else %}btn-secondary{% endif %}">{{ _('Back
+        to Home') }}</a>
 </div>
 
 {% endblock %}

@@ -1,0 +1,100 @@
+{% extends "sidebar_layout.html" %}
+
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ _('👥 Gestión Global de Equipos') }}</h2>
+</div>
+
+<div class="card">
+    <h3 style="margin-top: 0;">{{ _('📜 Todos los Equipos') }}</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Equipo') }}</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Torneo') }}</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: center;">{{ _('Jugadores')
+                        }}</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Estado') }}</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: right;">{{ _('Acciones') }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for team in teams %}
+                <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if team.logo_data %}
+                            <img src="{{ url_for('tournaments.team_logo', t_id=team.tournament_id, team_id=team.id) }}"
+                                style="height: 30px; width: 30px; object-fit: contain; border-radius: 4px;">
+                            {% else %}
+                            <div
+                                style="height: 30px; width: 30px; background: #eee; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8em; color: #999;">
+                                {{ team.name[0] }}
+                            </div>
+                            {% endif %}
+                            <strong>{{ team.name }}</strong>
+                        </div>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        <a href="{{ url_for('tournaments.tournament_dashboard', t_id=team.tournament_id) }}"
+                            style="text-decoration: none; color: #3498db;">
+                            {{ team.tournament.name }}
+                        </a>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">
+                        {{ team.players|length }}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {% if team.is_active %}
+                        <span class="badge active">{{ _('Activo') }}</span>
+                        {% else %}
+                        <span class="badge withdrawn">{{ _('Retirado') }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
+                        <a href="{{ url_for('tournaments.tournament_teams', t_id=team.tournament_id) }}"
+                            class="btn btn-secondary btn-sm">
+                            ⚙️ {{ _('Gestionar') }}
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 30px; color: #adb5bd;">
+                        {{ _('No hay equipos registrados aún.') }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge.active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge.withdrawn {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .btn-sm {
+        padding: 5px 12px;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}

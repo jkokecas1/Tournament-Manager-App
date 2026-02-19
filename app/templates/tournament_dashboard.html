@@ -1,53 +1,42 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
-<h2>{{ t.name }} <span style="font-size: 0.6em; color: #777;">{{ t.category }}</span></h2>
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ t.name }} <span style="font-size: 0.6em; color: #777;">{{ t.category }}</span></h2>
+</div>
 
-<div class="grid">
-    {% if current_user %}
-    <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}" class="card"
-        style="text-decoration: none; color: inherit; text-align: center;">
-        <h3>🛡️ {{ _('Teams') }}</h3>
-        <p>{{ _('Manage teams and players') }}</p>
-    </a>
-    {% endif %}
-
-    <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}" class="card"
-        style="text-decoration: none; color: inherit; text-align: center;">
-        <h3>📅 {{ _('Matches (Schedule)') }}</h3>
-        <p>{{ _('View fixtures and results') }}</p>
-    </a>
-
-    <a href="{{ url_for('tournaments.tournament_standings', t_id=t.id) }}" class="card"
-        style="text-decoration: none; color: inherit; text-align: center;">
-        <h3>📊 {{ _('Standings') }}</h3>
-        <p>{{ _('View table and stats') }}</p>
-    </a>
-
-    <a href="{{ url_for('tournaments.tournament_metrics', t_id=t.id) }}" class="card"
-        style="text-decoration: none; color: inherit; text-align: center;">
-        <h3>📈 {{ _('Metrics') }}</h3>
-        <p>{{ _('Top scorers & records') }}</p>
-    </a>
+<div class="grid" style="margin-bottom: 30px;">
+    <div class="card" style="text-align: center; border-left: 4px solid var(--augment);">
+        <h3 style="margin: 0;">{{ t.teams|length }}</h3>
+        <p style="margin: 5px 0 0; color: #7f8c8d;">{{ _('Equipos') }}</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 4px solid #3498db;">
+        <h3 style="margin: 0;">{{ t.matches|length }}</h3>
+        <p style="margin: 5px 0 0; color: #7f8c8d;">{{ _('Partidos') }}</p>
+    </div>
+    <div class="card" style="text-align: center; border-left: 4px solid #f1c40f;">
+        <h3 style="margin: 0;">{{ t.matches|selectattr('played')|list|length }}</h3>
+        <p style="margin: 5px 0 0; color: #7f8c8d;">{{ _('Jugados') }}</p>
+    </div>
 </div>
 
 {% if current_user and current_user.role == 'admin' %}
-<div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-    <h3>⚠️ {{ _('Danger Zone') }}</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+<div class="card" style="border: 1px solid #f8d7da; background: #fff;">
+    <h3 style="color: #c0392b; margin-top: 0;">⚠️ {{ _('Zona de Peligro') }}</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
         <form action="{{ url_for('tournaments.generate_schedule', t_id=t.id) }}" method="post"
-            onsubmit="return confirm('{{ _('Are you sure? This will replace existing matches.') }}');">
-            <button type="submit" class="btn" style="background-color: #e74c3c;">🔄 {{ _('Generate Round Robin
-                Schedule') }}</button>
+            onsubmit="return confirm('{{ _('¿Estás seguro? Esto reemplazará los partidos existentes.') }}');">
+            <button type="submit" class="btn" style="background-color: #e74c3c;">🔄 {{ _('Generar Calendario')
+                }}</button>
         </form>
 
         <form action="{{ url_for('tournaments.simulate_season', t_id=t.id) }}" method="post"
-            onsubmit="return confirm('{{ _('This will complete ALL unplayed matches with random scores. Continue?') }}');">
-            <button type="submit" class="btn" style="background-color: #9b59b6;">⚡ {{ _('Simulate Season') }}</button>
+            onsubmit="return confirm('{{ _('Esto completará TODOS los partidos no jugados con resultados aleatorios. ¿Continuar?') }}');">
+            <button type="submit" class="btn" style="background-color: #9b59b6;">⚡ {{ _('Simular Temporada') }}</button>
         </form>
 
         <button onclick="openArchiveModal()" class="btn" style="background-color: #7f8c8d;">
-            📂 {{ _('End Season / Archive') }}
+            📂 {{ _('Finalizar Temporada / Archivar') }}
         </button>
     </div>
 </div>
@@ -56,30 +45,31 @@
 <div id="archiveModal"
     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
     <div style="background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%;">
-        <h3 style="color: #c0392b; margin-top: 0;">{{ _('End Season & Archive') }}</h3>
-        <p>{{ _('This will mark the current tournament as INACTIVE and move it to history.') }}</p>
+        <h3 style="color: #c0392b; margin-top: 0;">{{ _('Finalizar Temporada y Archivar') }}</h3>
+        <p>{{ _('Esto marcará el torneo actual como INACTIVO y lo moverá al historial.') }}</p>
 
         <form action="{{ url_for('tournaments.archive_tournament', t_id=t.id) }}" method="POST">
             <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ _('Start New Season?')
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">{{ _('¿Iniciar Nueva Temporada?')
                     }}</label>
                 <select name="create_new_season" id="createNewSeason" onchange="toggleSeasonName()"
                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="yes">{{ _('Yes, start new season') }}</option>
-                    <option value="no">{{ _('No, just archive') }}</option>
+                    <option value="yes">{{ _('Sí, iniciar nueva temporada') }}</option>
+                    <option value="no">{{ _('No, solo archivar') }}</option>
                 </select>
             </div>
 
             <div id="seasonNameContainer" style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px;">{{ _('New Season Name') }}</label>
-                <input type="text" name="new_season_name" placeholder="e.g., Spring 2025"
+                <label style="display: block; margin-bottom: 5px;">{{ _('Nombre de la Nueva Temporada') }}</label>
+                <input type="text" name="new_season_name" placeholder="e.g., Primavera 2025"
                     style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
             </div>
 
             <div style="text-align: right; margin-top: 20px;">
                 <button type="button" onclick="closeArchiveModal()" class="btn"
-                    style="background-color: #95a5a6; margin-right: 10px;">{{ _('Cancel') }}</button>
-                <button type="submit" class="btn" style="background-color: #e74c3c;">{{ _('Confirm Archive') }}</button>
+                    style="background-color: #95a5a6; margin-right: 10px;">{{ _('Cancelar') }}</button>
+                <button type="submit" class="btn" style="background-color: #e74c3c;">{{ _('Confirmar Archivo')
+                    }}</button>
             </div>
         </form>
     </div>

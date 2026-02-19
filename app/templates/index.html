@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
+{% block layout_content %}
 <div class="card">
     <div
         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <h2>
+            <h2 style="margin: 0;">
                 {% if show_history %}
                 {{ _('Archived Tournaments') }}
                 {% else %}
@@ -43,9 +43,9 @@
     <div class="grid">
         {% for t in tournaments %}
         <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}" class="card"
-            style="text-decoration: none; color: inherit; border-left: 5px solid #2ecc71;">
-            <h3>🏆 {{ t.name }}</h3>
-            <p>{{ _('Category') }}: {{ t.category }}</p>
+            style="text-decoration: none; color: inherit; border-left: 5px solid #2ecc71; transition: transform 0.2s;">
+            <h3 style="margin-top: 0;">🏆 {{ t.name }}</h3>
+            <p style="margin-bottom: 0; color: #7f8c8d;">{{ _('Category') }}: {{ t.category }}</p>
         </a>
         {% endfor %}
     </div>
@@ -75,20 +75,34 @@
 </div>
 
 {% if current_user and current_user.role == 'admin' %}
-<div class="card" style="margin-top: 20px;">
-    <h3>{{ _('Create New Tournament') }}</h3>
+<div class="card" style="margin-top: 20px; border-top: 3px solid var(--augment);">
+    <h3 style="margin-top: 0;">{{ _('Create New Tournament') }}</h3>
     <form action="{{ url_for('tournaments.create_tournament') }}" method="post">
-        <input type="text" name="name" placeholder="{{ _('Tournament Name') }}" required>
-        <input type="text" name="category" placeholder="{{ _('Category (e.g., U12)') }}" required>
-
-        <h4>{{ _('Points System') }}</h4>
-        <div style="display: flex; gap: 10px;">
-            <input type="number" name="win_points" value="3" placeholder="{{ _('Win') }}" style="width: 80px;">
-            <input type="number" name="draw_points" value="1" placeholder="{{ _('Draw') }}" style="width: 80px;">
-            <input type="number" name="loss_points" value="0" placeholder="{{ _('Loss') }}" style="width: 80px;">
+        <div style="margin-bottom: 15px;">
+            <input type="text" name="name" placeholder="{{ _('Tournament Name') }}" required style="width: 100%;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <input type="text" name="category" placeholder="{{ _('Category (e.g., U12)') }}" required
+                style="width: 100%;">
         </div>
 
-        <button type="submit" class="btn">{{ _('Create Tournament') }}</button>
+        <h4 style="margin-bottom: 10px;">{{ _('Points System') }}</h4>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <div>
+                <label style="display: block; font-size: 0.8em; color: #666;">{{ _('Win') }}</label>
+                <input type="number" name="win_points" value="3" style="width: 80px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8em; color: #666;">{{ _('Draw') }}</label>
+                <input type="number" name="draw_points" value="1" style="width: 80px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8em; color: #666;">{{ _('Loss') }}</label>
+                <input type="number" name="loss_points" value="0" style="width: 80px;">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ _('Create Tournament') }}</button>
     </form>
 </div>
 {% endif %}

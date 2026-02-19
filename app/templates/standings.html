@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2>{{ _('Standings') }}</h2>
-    <button onclick="exportStandingsAsImage()" class="btn btn-primary">
-        {{ _('Export as Image') }}
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ _('🏆 Tabla de Posiciones') }}</h2>
+    <button onclick="exportStandingsAsImage()" class="btn btn-primary" style="font-size: 0.9em;">
+        📸 {{ _('Exportar como Imagen') }}
     </button>
 </div>
 
@@ -16,13 +16,13 @@
         <button onclick="closeModal()"
             style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: bold;">×</button>
 
-        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">{{ _('Standings Image') }}</h3>
+        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">{{ _('Imagen de Posiciones') }}</h3>
         <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
             <button onclick="copyToClipboard()" class="btn btn-primary">
-                📋 {{ _('Copy to Clipboard') }}
+                📋 {{ _('Copiar portapapeles') }}
             </button>
             <button onclick="downloadImage()" class="btn btn-primary">
-                💾 {{ _('Download') }}
+                💾 {{ _('Descargar') }}
             </button>
         </div>
         <div style="text-align: center; margin: 20px 0;">
@@ -31,7 +31,7 @@
         </div>
         <div id="copyMessage"
             style="display: none; text-align: center; margin-top: 15px; padding: 10px; background: #d4edda; color: #155724; border-radius: 5px; font-weight: 600;">
-            ✅ {{ _('Image copied to clipboard!') }}
+            ✅ {{ _('¡Imagen copiada!') }}
         </div>
     </div>
 </div>
@@ -39,7 +39,7 @@
 <!-- Hidden container for image export -->
 <div id="exportContainer"
     style="position: absolute; left: -9999px; top: -9999px; background: white; padding: 40px; width: 1200px; z-index: -9999; visibility: hidden;">
-    <!-- Header with logo, company name, and tournament -->
+    <!-- Export Header -->
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2c3e50; padding-bottom: 20px;">
         {% if site_config and site_config.company_logo %}
         <img src="{{ url_for('static', filename='uploads/' + site_config.company_logo) }}" alt="Logo"
@@ -48,25 +48,23 @@
         <h1 style="margin: 10px 0; color: #2c3e50; font-size: 32px;">
             {{ site_config.company_name if site_config and site_config.company_name else 'Tournament Manager' }}
         </h1>
-        <h2 style="margin: 5px 0; color: #34495e; font-size: 24px;">{{ t.name }} - {{ _('Standings') }}</h2>
+        <h2 style="margin: 5px 0; color: #34495e; font-size: 24px;">{{ t.name }} - {{ _('Posiciones') }}</h2>
     </div>
 
-    <!-- Standings table -->
-    <table id="standingsTableExport"
-        style="width: 100%; border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <!-- Export Table -->
+    <table id="standingsTableExport" style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr style="background: #2c3e50; color: black;">
-                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">{{ _('Pos') }}</th>
-                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">{{ _('Team') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('P') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('W') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('D') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('L') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('GF') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('GA') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('GD') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Pts') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Last 5') }}</th>
+            <tr style="background: #2c3e50; color: white;">
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('Pos') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('Equipo') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('PJ') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('G') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('E') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('P') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('GF') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('GC') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('DG') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('Pts') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -75,12 +73,10 @@
                 <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">{{ loop.index
                     }}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
                         {% if team.team.logo_data %}
-                        <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=team.team.id) }}" alt="Logo"
-                            style="width: 25px; height: 25px; object-fit: contain;">
-                        {% else %}
-                        <span style="font-size: 20px;">⚽</span>
+                        <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=team.team.id) }}"
+                            style="width: 25px; height: 25px;">
                         {% endif %}
                         <strong>{{ team.name }}</strong>
                     </div>
@@ -92,81 +88,80 @@
                 <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ team.gf }}</td>
                 <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ team.ga }}</td>
                 <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">{{ team.gf - team.ga }}</td>
-                <td
-                    style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; font-size: 16px;">
-                    {{ team.points }}</td>
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
-                    {% for result in team.form %}
-                    {% if result == 'W' %}
-                    <span>✅</span>
-                    {% elif result == 'D' %}
-                    <span>➖</span>
-                    {% else %}
-                    <span>❌</span>
-                    {% endif %}
-                    {% endfor %}
-                </td>
+                <td style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold;">{{ team.points
+                    }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- Visible table on page -->
-<table>
-    <thead>
-        <tr>
-            <th>{{ _('Pos') }}</th>
-            <th>{{ _('Team') }}</th>
-            <th>{{ _('P') }}</th>
-            <th>{{ _('W') }}</th>
-            <th>{{ _('D') }}</th>
-            <th>{{ _('L') }}</th>
-            <th>{{ _('GF') }}</th>
-            <th>{{ _('GA') }}</th>
-            <th>{{ _('GD') }}</th>
-            <th>{{ _('Pts') }}</th>
-            <th>{{ _('Last 5') }}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for team in standings %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            <td>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    {% if team.team.logo_data %}
-                    <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=team.team.id) }}" alt="Logo"
-                        style="width: 25px; height: 25px; object-fit: contain;">
-                    {% else %}
-                    <span style="font-size: 20px;">⚽</span>
-                    {% endif %}
-                    <strong>{{ team.name }}</strong>
-                </div>
-            </td>
-            <td>{{ team.played }}</td>
-            <td>{{ team.won }}</td>
-            <td>{{ team.drawn }}</td>
-            <td>{{ team.lost }}</td>
-            <td>{{ team.gf }}</td>
-            <td>{{ team.ga }}</td>
-            <td>{{ team.gf - team.ga }}</td>
-            <td><strong>{{ team.points }}</strong></td>
-            <td>
-                {% for result in team.form %}
-                {% if result == 'W' %}
-                <span title="{{ _('Won') }}">✅</span>
-                {% elif result == 'D' %}
-                <span title="{{ _('Drawn') }}">➖</span>
-                {% else %}
-                <span title="{{ _('Lost') }}">❌</span>
-                {% endif %}
-                {% endfor %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="card" style="padding: 0; overflow: hidden; border: 1px solid #eee;">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+        <thead style="background: #f8f9fa;">
+            <tr>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{
+                    _('Pos') }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; text-align: left;">{{ _('Equipo') }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('PJ')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('G')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('E')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('P')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('GF')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('GC')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 60px; text-align: center;">{{ _('DG')
+                    }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 80px; text-align: center;">{{
+                    _('Pts') }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 140px; text-align: center;">{{
+                    _('Últimos 5') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in standings %}
+            <tr style="border-bottom: 1px solid #f1f3f5; {{ 'background: #fdfdfe;' if loop.index <= 4 }}">
+                <td
+                    style="padding: 15px; text-align: center; font-weight: bold; color: {{ '#3498db' if loop.index <= 4 else '#7f8c8d' }};">
+                    {{ loop.index }}
+                </td>
+                <td style="padding: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        {% if team.team.logo_data %}
+                        <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=team.team.id) }}"
+                            style="width: 28px; height: 28px; object-fit: contain;">
+                        {% endif %}
+                        <strong>{{ team.name }}</strong>
+                    </div>
+                </td>
+                <td style="padding: 15px; text-align: center;">{{ team.played }}</td>
+                <td style="padding: 15px; text-align: center; color: #27ae60;">{{ team.won }}</td>
+                <td style="padding: 15px; text-align: center; color: #f39c12;">{{ team.drawn }}</td>
+                <td style="padding: 15px; text-align: center; color: #e74c3c;">{{ team.lost }}</td>
+                <td style="padding: 15px; text-align: center;">{{ team.gf }}</td>
+                <td style="padding: 15px; text-align: center;">{{ team.ga }}</td>
+                <td style="padding: 15px; text-align: center; font-weight: bold;">{{ team.gf - team.ga }}</td>
+                <td style="padding: 15px; text-align: center; font-weight: 800; font-size: 1.1rem; color: #2c3e50;">{{
+                    team.points }}</td>
+                <td style="padding: 15px; text-align: center;">
+                    <div style="display: flex; gap: 4px; justify-content: center;">
+                        {% for result in team.form %}
+                        <span style="font-size: 0.85em; cursor: default;" title="{{ result }}">
+                            {% if result == 'W' %}✅{% elif result == 'D' %}➖{% else %}❌{% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
@@ -175,8 +170,6 @@
 
     function exportStandingsAsImage() {
         const exportContainer = document.getElementById('exportContainer');
-
-        // Make visible but keep off-screen/transparent for rendering
         exportContainer.style.visibility = 'visible';
         exportContainer.style.opacity = '1';
         exportContainer.style.position = 'fixed';
@@ -184,36 +177,16 @@
         exportContainer.style.top = '0';
         exportContainer.style.zIndex = '-9999';
 
-        // Small delay to ensure the browser has actually rendered the element
         setTimeout(() => {
             html2canvas(exportContainer, {
                 scale: 2,
                 backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: 1280,
-                windowHeight: 720
+                useCORS: true
             }).then(canvas => {
-                // Hide the container again
                 exportContainer.style.visibility = 'hidden';
                 exportContainer.style.opacity = '0';
-                exportContainer.style.position = 'absolute';
-                exportContainer.style.left = '-9999px';
-                exportContainer.style.top = '-9999px';
-                exportContainer.style.zIndex = '-9999';
-
-                // Store the image data
                 generatedImageDataUrl = canvas.toDataURL('image/png');
-
-                // Convert to blob for clipboard
-                canvas.toBlob(blob => {
-                    generatedImageBlob = blob;
-                }, 'image/png');
-
-                // Show modal with preview
+                canvas.toBlob(blob => { generatedImageBlob = blob; }, 'image/png');
                 document.getElementById('previewImage').src = generatedImageDataUrl;
                 document.getElementById('imageModal').style.display = 'flex';
             });
@@ -230,18 +203,10 @@
             if (generatedImageBlob) {
                 const item = new ClipboardItem({ 'image/png': generatedImageBlob });
                 await navigator.clipboard.write([item]);
-
-                // Show success message
-                const message = document.getElementById('copyMessage');
-                message.style.display = 'block';
-                setTimeout(() => {
-                    message.style.display = 'none';
-                }, 3000);
+                document.getElementById('copyMessage').style.display = 'block';
+                setTimeout(() => { document.getElementById('copyMessage').style.display = 'none'; }, 3000);
             }
-        } catch (err) {
-            alert('{{ _("Error copying to clipboard. Please try downloading instead.") }}');
-            console.error('Error copying to clipboard:', err);
-        }
+        } catch (err) { alert('Error al copiar.'); }
     }
 
     function downloadImage() {
@@ -250,12 +215,5 @@
         link.href = generatedImageDataUrl;
         link.click();
     }
-
-    // Close modal when clicking outside
-    document.getElementById('imageModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            closeModal();
-        }
-    });
 </script>
 {% endblock %}

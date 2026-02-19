@@ -47,12 +47,16 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: {
+                    {
+                    '1400px' if hide_tournament_nav else '1200px'
+                }
+            }
+
+            ;
             margin: 20px auto;
             padding: 20px;
-            background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         h1,
@@ -155,11 +159,12 @@
             {% else %}
             <span style="font-size: 1.5rem;">⚽</span>
             {% endif %}
-            {{ site_config.company_name if site_config else 'Tournament Manager' }}
+            <a href="/" style="margin: 0; color: white; display: inline;">{{ site_config.company_name if site_config
+                else 'Tournament Manager' }}</a>
         </div>
         <div>
             <a href="/">{{ _('Home') }}</a>
-            {% if t %}
+            {% if t and not hide_tournament_nav %}
             <span> | {{ t.name }} </span>
             <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}">{{ _('Dashboard') }}</a>
             <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}">{{ _('Teams') }}</a>
@@ -171,21 +176,6 @@
 
             {% if current_user %}
             <span title="Role: {{ current_user.role }}">👤 {{ current_user.username }}</span>
-            {% if current_user.role == 'admin' %}
-            <a href="{{ url_for('admin.admin_panel') }}" style="color: #f1c40f;">{{ _('Admin') }}</a>
-            {% endif %}
-            {% if current_user.role == 'rep' or current_user.role == 'admin' %}
-            <a href="{{ url_for('tournaments.pending_goals') }}">
-                {{ _('Pending Goals') }}
-                {% set pending_count = current_user.team.pending_goals|selectattr('assigned_count', 'lt', 3)|list|length
-                if current_user.team else 0 %}
-                {% if pending_count > 0 %}
-                <span
-                    style="background: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7em;">{{
-                    pending_count }}</span>
-                {% endif %}
-            </a>
-            {% endif %}
             <a href="{{ url_for('auth.logout') }}" style="font-weight: normal; font-size: 0.9em;">{{ _('Logout') }}</a>
             {% else %}
             <a href="{{ url_for('auth.login') }}">{{ _('Login') }}</a>

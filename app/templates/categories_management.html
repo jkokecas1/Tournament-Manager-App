@@ -1,0 +1,140 @@
+{% extends "sidebar_layout.html" %}
+
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ _('📁 Gestión de Categorías') }}</h2>
+</div>
+
+<div class="grid" style="grid-template-columns: 1fr 1.5fr; gap: 30px;">
+    <!-- Add Category Form -->
+    <div class="card" style="height: fit-content;">
+        <h3 style="margin-top: 0;">{{ _('➕ Añadir Nueva Categoría') }}</h3>
+        <p style="font-size: 0.9em; color: #6c757d; margin-bottom: 15px;">
+            {{ _('Define etiquetas estructuradas para organizar tus torneos.') }}
+        </p>
+        <form action="{{ url_for('admin.manage_categories') }}" method="post">
+            <label style="font-weight: 600; display: block; margin-bottom: 8px;">{{ _('Nombre de la Categoría')
+                }}</label>
+            <input type="text" name="name" placeholder="{{ _('ej. Juvenil, Veteranos, Pro') }}" required
+                style="width: 100%; margin-bottom: 15px;">
+            <button type="submit" class="btn" style="width: 100%;">{{ _('Guardar Categoría') }}</button>
+        </form>
+    </div>
+
+    <!-- Category List -->
+    <div class="card">
+        <h3 style="margin-top: 0;">{{ _('📜 Categorías Definidas') }}</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">{{ _('Nombre') }}
+                        </th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: center;">{{ _('Torneos')
+                            }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: right;">{{ _('Acciones')
+                            }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.2em;">📁</span>
+                                <strong>{{ cat.name }}</strong>
+                            </div>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">
+                            <span class="badge"
+                                style="background: #e9ecef; color: #495057; padding: 2px 8px; border-radius: 10px; font-weight: 600;">
+                                {{ cat.tournaments|length }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
+                            <form action="{{ url_for('admin.delete_category', cat_id=cat.id) }}" method="post"
+                                style="display: inline;"
+                                onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta categoría?');">
+                                <button type="submit" class="btn btn-danger btn-sm" {% if cat.tournaments %}disabled
+                                    title="{{ _('En uso') }}" {% endif %}>
+                                    🗑️
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 40px; color: #adb5bd;">
+                            {{ _('No hay categorías definidas. Crea la primera a la izquierda.') }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if old_categories %}
+{% set legacy_needed = false %}
+{% for name, count in old_categories %}
+{% set structured = false %}
+{% for c in categories %}
+{% if c.name == name %}
+{% set structured = true %}
+{% endif %}
+{% endfor %}
+{% if not structured %}
+{% set legacy_needed = true %}
+{% endif %}
+{% endfor %}
+
+{% if legacy_needed %}
+<div class="card" style="margin-top: 30px; border: 1px dashed #ced4da; background: #fafbfc;">
+    <h4 style="margin-top: 0; color: #6c757d;">⚠️ {{ _('Categorías Detectadas (Legacy)') }}</h4>
+    <p style="font-size: 0.85em; color: #7f8c8d;">
+        {{ _('Estas son categorías que existen como texto en torneos antiguos pero no están en el nuevo sistema
+        estructurado.') }}
+    </p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+        {% for name, count in old_categories %}
+        {% set structured = false %}
+        {% for c in categories %}
+        {% if c.name == name %}
+        {% set structured = true %}
+        {% endif %}
+        {% endfor %}
+        {% if not structured %}
+        <div
+            style="background: #fff; border: 1px solid #dee2e6; padding: 8px 15px; border-radius: 20px; font-size: 0.85em; display: flex; align-items: center; gap: 10px;">
+            <span>{{ name }}</span>
+            <span style="color: #adb5bd;">({{ count }})</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<style>
+    .btn-danger {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #c0392b;
+    }
+
+    .btn-danger:disabled {
+        background: #fab1a0;
+        cursor: not-allowed;
+    }
+
+    .btn-sm {
+        padding: 6px 10px;
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}

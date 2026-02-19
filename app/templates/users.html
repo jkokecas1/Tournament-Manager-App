@@ -1,24 +1,23 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2>{{ _('👤 User Management') }}</h2>
-    <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-secondary">{{ _('Back to Admin') }}</a>
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ _('👤 Gestión de Usuarios') }}</h2>
 </div>
 
-<div class="grid">
+<div class="grid" style="grid-template-columns: 1fr 2fr; gap: 30px;">
     <!-- Create User Form -->
-    <div class="card">
-        <h3>{{ _('➕ Create User') }}</h3>
+    <div class="card" style="height: fit-content; position: sticky; top: 20px;">
+        <h3 style="margin-top: 0;">{{ _('➕ Crear Usuario') }}</h3>
         <form action="{{ url_for('admin.manage_users') }}" method="post">
-            <label>Username</label>
+            <label style="font-weight: 600;">{{ _('Nombre de usuario') }}</label>
             <input type="text" name="username" required>
 
-            <label>Password</label>
+            <label style="font-weight: 600;">{{ _('Contraseña') }}</label>
             <input type="password" name="password" required
-                style="width: 95%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
 
-            <label>{{ _('Role:') }}</label>
+            <label style="font-weight: 600;">{{ _('Rol:') }}</label>
             <select name="role" id="roleSelect" onchange="toggleTeamSelect()">
                 <option value="user">User</option>
                 <option value="rep">Representative</option>
@@ -27,60 +26,65 @@
             </select>
 
             <div id="teamSelectDiv" style="display: none; margin-top: 10px;">
-                <label>{{ _('Assign Team (For Reps):') }}</label>
+                <label style="font-weight: 600;">{{ _('Asignar Equipo (Para Representantes):') }}</label>
                 <select name="team_id">
-                    <option value="">-- Select Team --</option>
+                    <option value="">-- Seleccionar Equipo --</option>
                     {% for team in teams %}
                     <option value="{{ team.id }}">{{ team.tournament.name }} - {{ team.name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <button type="submit" class="btn">{{ _('Create User') }}</button>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">{{ _('Crear Usuario') }}</button>
         </form>
 
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-            <h3>{{ _('🤖 Bulk Generation') }}</h3>
-            <p style="font-size: 0.9em; color: #666;">{{ _('Generate a representative user for every team that doesn\'t
-                have one yet.') }}</p>
+        <div id="bulk-gen" style="margin-top: 35px; padding-top: 25px; border-top: 1px solid #f1f3f5;">
+            <h3 style="margin-top: 0; font-size: 1.1em;">🤖 {{ _('Generación Masiva') }}</h3>
+            <p style="font-size: 0.85em; color: #6c757d; line-height: 1.5;">
+                {{ _('Generar un usuario de representante para cada equipo que aún no tenga uno.') }}
+            </p>
             <form action="{{ url_for('admin.generate_reps') }}" method="post">
-                <button type="submit" class="btn" style="background-color: #3498db;">{{ _('Generate Team Users')
-                    }}</button>
+                <button type="submit" class="btn" style="background-color: #3498db; width: 100%;">
+                    {{ _('Generar Usuarios de Equipos') }}
+                </button>
             </form>
         </div>
     </div>
 
     <!-- User Table -->
-    <div class="card" style="grid-column: span 2;">
-        <h3>{{ _('📜 All Users') }}</h3>
+    <div class="card">
+        <h3 style="margin-top: 0;">{{ _('📜 Todos los Usuarios') }}</h3>
         <div style="overflow-x: auto;">
-            <table>
+            <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Role</th>
-                        <th>Assigned Team</th>
-                        <th>Actions</th>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Usuario') }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Rol') }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6;">{{ _('Equipo Asignado') }}</th>
+                        <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: center;">{{
+                            _('Acciones') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for u in users %}
                     <tr>
-                        <td><strong>{{ u.username }}</strong></td>
-                        <td><span class="badge">{{ u.role }}</span></td>
-                        <td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;"><strong>{{ u.username }}</strong></td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                            <span class="badge role-{{ u.role }}">{{ u.role }}</span>
+                        </td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee;">
                             {% if u.team_id %}
-                            {% set team = teams | selectattr("id", "equalto", u.team_id) | first %}
-                            {{ team.name if team else u.team_id }}
+                            <span style="font-size: 0.9em; color: #495057;">{{ u.team.name if u.team else u.team_id
+                                }}</span>
                             {% else %}
-                            -
+                            <span style="color: #adb5bd; font-style: italic;">-</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">
                             <button class="btn btn-secondary btn-sm"
                                 onclick="copyCredentials('{{ u.username }}', '{{ u.password }}')"
-                                title="{{ _('Copy Username and Password') }}">
-                                📋 {{ _('Copy') }}
+                                title="{{ _('Copiar Usuario y Contraseña') }}">
+                                📋 {{ _('Copiar') }}
                             </button>
                         </td>
                     </tr>
@@ -95,7 +99,7 @@
     function copyCredentials(username, password) {
         const textToCopy = `${username}:${password}`;
         navigator.clipboard.writeText(textToCopy).then(() => {
-            alert(`{{ _('Credentials copied to clipboard for') }} ${username}`);
+            alert(`{{ _('Credenciales copiadas al portapapeles para') }} ${username}`);
         }).catch(err => {
             console.error('Error copying text: ', err);
         });
@@ -115,11 +119,37 @@
 <style>
     .badge {
         display: inline-block;
-        padding: 2px 8px;
+        padding: 4px 10px;
         background: #eee;
-        border-radius: 12px;
-        font-size: 0.85em;
-        text-transform: capitalize;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .role-admin {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .role-referee {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .role-rep {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .role-user {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .btn-sm {
+        padding: 5px 12px;
+        font-size: 0.8rem;
     }
 </style>
 {% endblock %}

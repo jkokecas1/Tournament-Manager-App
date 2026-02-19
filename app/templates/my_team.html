@@ -1,0 +1,163 @@
+{% extends "sidebar_layout.html" %}
+
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">🛡️ {{ _('Gestión de Mi Equipo') }}: {{ team.name }}</h2>
+    <span class="badge" style="background: var(--augment); color: white; padding: 5px 12px; border-radius: 20px;">
+        {{ team.tournament.name }}
+    </span>
+</div>
+
+<div class="grid" style="grid-template-columns: 1fr 2fr; gap: 30px;">
+    <!-- Team Info & Logo -->
+    <div class="card" style="height: fit-content;">
+        <h3 style="margin-top: 0;">{{ _('Información del Equipo') }}</h3>
+
+        <div style="text-align: center; margin-bottom: 20px; position: relative;">
+            {% if team.logo %}
+            <img src="{{ url_for('tournaments.team_logo', t_id=team.tournament_id, team_id=team.id) }}" alt="Logo"
+                style="width: 150px; height: 150px; border-radius: 12px; object-fit: cover; border: 1px solid #eee;">
+            {% else %}
+            <div
+                style="width: 150px; height: 150px; background: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #adb5bd; font-size: 3em; border: 1px dashed #dee2e6;">
+                🛡️
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('teams.update_logo') }}" method="post" enctype="multipart/form-data"
+                style="margin-top: 15px;">
+                <label class="btn btn-secondary" style="font-size: 0.85em; cursor: pointer;">
+                    📷 {{ _('Cambiar Logo') }}
+                    <input type="file" name="logo" hidden onchange="this.form.submit()">
+                </label>
+            </form>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <div style="font-size: 0.9em; color: #666;">
+            <p><strong>{{ _('ID de Equipo') }}:</strong> #{{ team.id }}</p>
+            <p><strong>{{ _('Estado') }}:</strong>
+                <span style="color: {{ 'var(--augment)' if team.is_active else 'var(--danger)' }}">
+                    ● {{ _('Activo') if team.is_active else _('Inactivo') }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Players Management -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">👥 {{ _('Lista de Jugadores') }}</h3>
+            <button class="btn" onclick="document.getElementById('addPlayerRow').style.display='table-row'">
+                ➕ {{ _('Añadir Jugador') }}
+            </button>
+        </div>
+
+        <table style="width: 100%;">
+            <thead>
+                <tr style="background: #f8f9fa;">
+                    <th style="width: 60px; text-align: center;">{{ _('Dorsal') }}</th>
+                    <th>{{ _('Nombre') }}</th>
+                    <th>{{ _('Posición') }}</th>
+                    <th style="width: 100px; text-align: right;">{{ _('Acciones') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Add Player Inline Form -->
+                <tr id="addPlayerRow" style="display: none; background: #fffde7;">
+                    <form action="{{ url_for('teams.add_player') }}" method="post">
+                        <td style="padding: 8px;"><input type="number" name="number" value="1" required
+                                style="margin: 0;"></td>
+                        <td style="padding: 8px;"><input type="text" name="name"
+                                placeholder="{{ _('Nombre completo') }}" required style="margin: 0;"></td>
+                        <td style="padding: 8px;">
+                            <select name="position" style="margin: 0;">
+                                <option value="Portero">Portero</option>
+                                <option value="Defensa">Defensa</option>
+                                <option value="Centrocampista">Centrocampista</option>
+                                <option value="Delantero">Delantero</option>
+                            </select>
+                        </td>
+                        <td style="padding: 8px; text-align: right;">
+                            <button type="submit" class="btn btn-sm">✅</button>
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                onclick="document.getElementById('addPlayerRow').style.display='none'">❌</button>
+                        </td>
+                    </form>
+                </tr>
+
+                {% for p in team.players|sort(attribute='number') %}
+                <tr>
+                    <td style="text-align: center;">
+                        <span style="font-weight: bold; background: #f1f3f5; padding: 4px 8px; border-radius: 4px;">
+                            #{{ p.number }}
+                        </span>
+                    </td>
+                    <td><strong>{{ p.name }}</strong></td>
+                    <td><span style="font-size: 0.85em; color: #666;">{{ p.position }}</span></td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-secondary btn-sm" onclick="toggleEdit('{{ p.id }}')">✏️</button>
+                        <form action="{{ url_for('teams.delete_player', p_id=p.id) }}" method="post"
+                            style="display: inline;" onsubmit="return confirm('¿Eliminar a este jugador?');">
+                            <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                <!-- Edit Player Form Row -->
+                <tr id="editRow-{{ p.id }}" style="display: none; background: #f1f3f5;">
+                    <form action="{{ url_for('teams.update_player', p_id=p.id) }}" method="post">
+                        <td style="padding: 8px;"><input type="number" name="number" value="{{ p.number }}" required
+                                style="margin: 0;"></td>
+                        <td style="padding: 8px;"><input type="text" name="name" value="{{ p.name }}" required
+                                style="margin: 0;"></td>
+                        <td style="padding: 8px;">
+                            <select name="position" style="margin: 0;">
+                                <option value="Portero" {% if p.position=='Portero' %}selected{% endif %}>Portero
+                                </option>
+                                <option value="Defensa" {% if p.position=='Defensa' %}selected{% endif %}>Defensa
+                                </option>
+                                <option value="Centrocampista" {% if p.position=='Centrocampista' %}selected{% endif %}>
+                                    Centrocampista</option>
+                                <option value="Delantero" {% if p.position=='Delantero' %}selected{% endif %}>Delantero
+                                </option>
+                            </select>
+                        </td>
+                        <td style="padding: 8px; text-align: right;">
+                            <button type="submit" class="btn btn-sm">💾</button>
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                onclick="toggleEdit('{{ p.id }}')">❌</button>
+                        </td>
+                    </form>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 30px; color: #adb5bd;">
+                        {{ _('Aún no has añadido jugadores a tu equipo.') }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleEdit(id) {
+        const row = document.getElementById('editRow-' + id);
+        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+    }
+</script>
+
+<style>
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.85em;
+    }
+
+    input,
+    select {
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}

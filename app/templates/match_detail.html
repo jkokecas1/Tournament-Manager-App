@@ -24,8 +24,22 @@
         <option value="{{ r.id }}" {% if match.referee_id==r.id %}selected{% endif %}>{{ r.username }}</option>
         {% endfor %}
     </select>
-    <button type="submit" class="btn btn-secondary" style="font-size: 0.8em; padding: 2px 8px;">{{ _('Save Ref')
-        }}</button>
+
+    <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+        <div>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 2px;">{{ _('Start Time:') }}</label>
+            <input type="time" name="start_time" value="{{ match.start_time.strftime('%H:%M') if match.start_time }}"
+                style="padding: 5px;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 0.9em; margin-bottom: 2px;">{{ _('End Time:') }}</label>
+            <input type="time" name="end_time" value="{{ match.end_time.strftime('%H:%M') if match.end_time }}"
+                style="padding: 5px;">
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-secondary" style="margin-top: 15px; font-size: 0.8em; padding: 5px 15px;">{{
+        _('Save Changes') }}</button>
 </form>
 {% endif %}
 

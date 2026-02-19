@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import db
-from app.models import User, Tournament, Team, Player, Match, MatchEvent
+from app.models import User, Tournament, Team, Player, Match, MatchEvent, PendingGoalAssignment, TournamentCategory
 from app.utils.decorators import admin_required, admin_or_rep_required, admin_or_referee_required, login_required
 from . import tournaments_bp
 import os
@@ -12,16 +12,24 @@ from app.utils.image_utils import resize_image
 @admin_required
 def create_tournament():
     name = request.form.get('name')
-    category = request.form.get('category')
+    category_name = request.form.get('category') # Legacy or custom
+    category_id = request.form.get('category_id') # From selector
     win = int(request.form.get('win_points', 3))
     draw = int(request.form.get('draw_points', 1))
     loss = int(request.form.get('loss_points', 0))
     
-    if name and category:
-        t = Tournament(name=name, category=category, win_points=win, draw_points=draw, loss_points=loss)
+    if name:
+        t = Tournament(name=name, win_points=win, draw_points=draw, loss_points=loss)
+        if category_id:
+            t.category_id = int(category_id)
+            cat = db.session.get(TournamentCategory, category_id)
+            t.category = cat.name if cat else "General"
+        else:
+            t.category = category_name or "General"
+            
         db.session.add(t)
         db.session.commit()
-    return redirect(url_for('main.index'))
+    return redirect(url_for('tournaments.tournaments_management'))
 
 @tournaments_bp.route('/t/<int:t_id>/archive', methods=['POST'])
 @admin_required
@@ -414,9 +422,26 @@ def match_detail(t_id, m_id):
             try:
                 ref_id = request.form.get('referee_id')
                 match.referee_id = int(ref_id) if ref_id else None
+                
+                # Update times if provided by admin
+                from datetime import datetime
+                start_time_str = request.form.get('start_time')
+                end_time_str = request.form.get('end_time')
+                
+                if start_time_str:
+                    match.start_time = datetime.strptime(start_time_str, '%H:%M').time()
+                else:
+                    match.start_time = None
+                    
+                if end_time_str:
+                    match.end_time = datetime.strptime(end_time_str, '%H:%M').time()
+                else:
+                    match.end_time = None
+                
                 db.session.commit()
-                flash("Referee assigned.")
-            except ValueError:
+                flash("Match updated.")
+            except (ValueError, TypeError):
+                flash("Invalid time format.")
                 pass
 
         if user.role == 'admin' or user.role == 'referee':
@@ -525,21 +550,35 @@ def tournament_metrics(t_id):
                            team_cards=team_cards)
 
 @tournaments_bp.route('/pending_goals')
+@tournaments_bp.route('/tournament/<int:t_id>/pending_goals')
 @login_required
-def pending_goals():
+def pending_goals(t_id=None):
     user = db.session.get(User, session['user_id'])
     if user.role != 'admin' and not (user.role == 'rep' and user.team_id):
         flash("Access denied.")
         return redirect(url_for('main.index'))
     
-    from app.models import PendingGoalAssignment
-    
     query = PendingGoalAssignment.query.filter(PendingGoalAssignment.assigned_count < PendingGoalAssignment.count)
+    
+    current_tournament = None
+    if t_id:
+        current_tournament = db.session.get(Tournament, t_id)
+        if not current_tournament:
+            t_id = None
+
     if user.role == 'rep':
         query = query.filter_by(team_id=user.team_id)
-        
-    pending = query.all()
-    return render_template('pending_goals.html', pending=pending)
+
+    all_pending = query.all()
+    
+    # Use application-level filter for tournament context to ensure consistency with sidebar badges
+    if t_id:
+        pending = [p for p in all_pending if p.match.tournament_id == t_id]
+    else:
+        pending = all_pending
+    return render_template('pending_goals.html', pending=pending, t=current_tournament)
+
+    return render_template('pending_goals.html', pending=pending, t=current_tournament)
 
 @tournaments_bp.route('/assign_goal', methods=['POST'])
 @login_required
@@ -571,8 +610,8 @@ def assign_goal():
         pending.assigned_count += 1
         db.session.commit()
         flash("Goal assigned successfully.")
-    
-    return redirect(url_for('tournaments.pending_goals'))
+    t_id = request.form.get('t_id')
+    return redirect(url_for('tournaments.pending_goals', t_id=t_id))
 
 @tournaments_bp.route('/t/<int:t_id>/match/<int:m_id>/change_matchday', methods=['POST'])
 @admin_required

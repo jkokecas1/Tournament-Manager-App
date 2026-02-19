@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% set hide_tournament_nav = True %}
+
+{% block content %}
+<div class="layout-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="sidebar-section">
+            <h4>{{ _('Torneos') }}</h4>
+            <ul>
+                {% for active_t in active_tournaments %}
+                <li>
+                    <a href="{{ url_for('tournaments.tournament_dashboard', t_id=active_t.id) }}"
+                        class="{% if t and t.id == active_t.id and request.endpoint != 'main.index' %}active{% endif %}"
+                        style="font-size: 0.85em; padding-left: 20px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>🏆 {{ active_t.name }}</span>
+                        {% if pending_counts.get(active_t.id) %}
+                        <span class="badge" title="{{ _('Goles Pendientes') }}"
+                            style="background: #e67e22; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.75em; margin-left: 5px;">
+                            {{ pending_counts.get(active_t.id) }}
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% else %}
+                <li style="padding: 10px 15px; font-size: 0.85em; color: #adb5bd; font-style: italic;">
+                    {{ _('No hay torneos activos') }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if t %}
+        <div class="sidebar-section">
+            <h4>{{ _('Torneo Actual') }}</h4>
+            <div
+                style="padding: 0 10px 10px; font-weight: 600; color: var(--augment); font-size: 0.9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                🏆 {{ t.name }}
+            </div>
+            <ul>
+                <li>
+                    <a href="{{ url_for('tournaments.tournament_dashboard', t_id=t.id) }}"
+                        class="{% if request.endpoint == 'tournaments.tournament_dashboard' %}active{% endif %}">
+                        📊 {{ _('Dashboard') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('tournaments.tournament_teams', t_id=t.id) }}"
+                        class="{% if request.endpoint == 'tournaments.tournament_teams' %}active{% endif %}">
+                        🛡️ {{ _('Equipos') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}"
+                        class="{% if request.endpoint == 'tournaments.tournament_schedule' %}active{% endif %}">
+                        📅 {{ _('Calendario') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('tournaments.tournament_standings', t_id=t.id) }}"
+                        class="{% if request.endpoint == 'tournaments.tournament_standings' %}active{% endif %}">
+                        📈 {{ _('Clasificación') }}
+                    </a>
+                </li>
+                {% if current_user and (current_user.role == 'admin' or current_user.role == 'rep') %}
+                <li>
+                    <a href="{{ url_for('tournaments.pending_goals', t_id=t.id) }}"
+                        class="{% if request.endpoint == 'tournaments.pending_goals' %}active{% endif %}">
+                        ⚽ {{ _('Goles Pendientes') }}
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+
+
+
+        {% if current_user and current_user.role in ['admin', 'rep'] %}
+        <div class="sidebar-section">
+            <h4>{{ _('Gestión Equipo') if not t else _('Mi Equipo') }}</h4>
+            <ul>
+                {% if current_user.role == 'rep' and current_user.team %}
+                <li>
+                    <a href="{{ url_for('teams.my_team') }}"
+                        class="{% if request.endpoint == 'teams.my_team' %}active{% endif %}">
+                        🛡️ {{ _('Mi Equipo') }}
+                    </a>
+                </li>
+                {% endif %}
+                <li>
+                    <a href="{{ url_for('tournaments.pending_goals') }}"
+                        class="{% if request.endpoint == 'tournaments.pending_goals' %}active{% endif %}">
+                        ⚽ {{ _('Goles Pendientes') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if current_user and current_user.role == 'admin' %}
+        <div class="sidebar-section">
+            <h4>{{ _('Administración') }}</h4>
+            <ul>
+                <li>
+                    <a href="{{ url_for('admin.manage_tournaments') }}"
+                        class="{% if request.endpoint == 'admin.manage_tournaments' %}active{% endif %}">
+                        🏆 {{ _('Gestionar Torneos') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.manage_users') }}"
+                        class="{% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+                        👤 {{ _('Usuarios') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.manage_teams') }}"
+                        class="{% if request.endpoint == 'admin.manage_teams' %}active{% endif %}">
+                        🛡️ {{ _('Equipos Global') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.manage_categories') }}"
+                        class="{% if request.endpoint == 'admin.manage_categories' %}active{% endif %}">
+                        📁 {{ _('Categorías') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('marketing.dashboard') }}"
+                        class="{% if request.endpoint == 'marketing.dashboard' %}active{% endif %}">
+                        📢 {{ _('Marketing & Premios') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('admin.admin_panel') }}"
+                        class="{% if request.endpoint == 'admin.admin_panel' %}active{% endif %}">
+                        ⚙️ {{ _('Ajustes del Sitio') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </aside>
+
+    <!-- Main Content -->
+    <main class="layout-main">
+        {% block layout_content %}{% endblock %}
+    </main>
+</div>
+
+<style>
+    .layout-container {
+        display: flex;
+        gap: 30px;
+        min-height: 80vh;
+        margin-top: 20px;
+    }
+
+    .sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        border: 1px solid #e1e8ed;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-section {
+        margin-bottom: 25px;
+    }
+
+    .sidebar-section h4 {
+        color: #adb5bd;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        margin-bottom: 12px;
+        padding-left: 10px;
+    }
+
+    .sidebar-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-section li {
+        margin-bottom: 4px;
+    }
+
+    .sidebar-section a {
+        text-decoration: none;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-section a:hover {
+        background: #f8f9fa;
+        color: #2c3e50;
+        transform: translateX(5px);
+    }
+
+    .sidebar-section a.active {
+        background: #e9ecef;
+        color: #2c3e50;
+        font-weight: 600;
+        border-left: 4px solid var(--augment);
+    }
+
+    .layout-main {
+        flex: 1;
+        background: #fff;
+        border-radius: 12px;
+        padding: 35px;
+        border: 1px solid #e1e8ed;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        min-width: 0;
+    }
+
+    @media (max-width: 992px) {
+        .layout-container {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            position: static;
+        }
+    }
+</style>
+{% endblock %}

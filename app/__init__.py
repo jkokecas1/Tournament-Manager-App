@@ -42,10 +42,14 @@ from app.blueprints.main import main_bp
 from app.blueprints.auth import auth_bp
 from app.blueprints.admin import admin_bp
 from app.blueprints.tournaments import tournaments_bp
+from app.blueprints.teams import teams_bp
+from app.blueprints.marketing import marketing_bp
 
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(tournaments_bp)
+app.register_blueprint(teams_bp)
+app.register_blueprint(marketing_bp)
 
 from app import models # Keep models import for DB initialization if needed

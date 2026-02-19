@@ -1,0 +1,217 @@
+{% extends "sidebar_layout.html" %}
+
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h2 style="margin: 0;">📢 {{ _('Panel de Marketing y Premios') }}</h2>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn" style="background: linear-gradient(45deg, #6a11cb, #2575fc);"
+            onclick="document.getElementById('generateAIModal').style.display='block'">
+            ✨ {{ _('Generar con IA') }}
+        </button>
+        <button class="btn btn-secondary" onclick="document.getElementById('uploadAssetModal').style.display='block'">
+            📤 {{ _('Subir Contenido') }}
+        </button>
+        <button class="btn" onclick="document.getElementById('addPrizeModal').style.display='block'">
+            🏆 {{ _('Añadir Premio') }}
+        </button>
+    </div>
+</div>
+
+<!-- Prize Management -->
+<div class="card" style="margin-bottom: 30px; border-left: 5px solid var(--augment);">
+    <h3>🏆 {{ _('Gestión de Premios por Torneo') }}</h3>
+    <table style="width: 100%;">
+        <thead>
+            <tr>
+                <th>{{ _('Torneo') }}</th>
+                <th>{{ _('Rango') }}</th>
+                <th>{{ _('Título') }}</th>
+                <th>{{ _('Premio') }}</th>
+                <th style="text-align: right;">{{ _('Acciones') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prize in prizes %}
+            <tr>
+                <td>{{ prize.tournament.name }}</td>
+                <td><span class="badge">{{ prize.rank }}</span></td>
+                <td><strong>{{ prize.title }}</strong></td>
+                <td>{{ prize.reward_value }}</td>
+                <td style="text-align: right;">
+                    <form action="{{ url_for('marketing.delete_prize', p_id=prize.id) }}" method="post"
+                        style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('¿Eliminar premio?')">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999; padding: 20px;">
+                    {{ _('No hay premios configurados aún.') }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Marketing Assets Gallery -->
+<div class="card">
+    <h3 style="margin-bottom: 20px;">🖼️ {{ _('Galería de Promoción') }}</h3>
+    <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+        {% for asset in assets %}
+        <div
+            style="border: 1px solid #eee; border-radius: 12px; overflow: hidden; background: #fff; position: relative;">
+            {% if asset.type == 'image' %}
+            <img src="{{ url_for('static', filename='uploads/marketing/' + asset.filename) }}" alt="{{ asset.title }}"
+                style="width: 100%; height: 150px; object-fit: cover;">
+            {% else %}
+            <div
+                style="width: 100%; height: 150px; background: #000; display: flex; align-items: center; justify-content: center; color: white;">
+                📹 Video
+            </div>
+            {% endif %}
+            <div style="padding: 10px;">
+                <p
+                    style="margin: 0; font-size: 0.85em; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    {{ asset.title or asset.filename }}
+                </p>
+                <p style="margin: 5px 0 0; font-size: 0.75em; color: #7f8c8d;">
+                    {{ asset.tournament.name if asset.tournament else 'Global' }}
+                </p>
+            </div>
+            <form action="{{ url_for('marketing.delete_asset', a_id=asset.id) }}" method="post"
+                style="position: absolute; top: 5px; right: 5px;">
+                <button type="submit" class="btn btn-danger btn-sm"
+                    style="padding: 2px 6px; font-size: 10px; opacity: 0.8;"
+                    onclick="return confirm('¿Eiminar?')">✕</button>
+            </form>
+        </div>
+        {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">
+            <p>{{ _('Aún no has subido contenido promocional.') }}</p>
+            <p style="font-size: 0.8em;">{{ _('Sube imágenes o videos para empezar.') }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="generateAIModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);">
+    <div class="card" style="width: 500px; margin: 100px auto; position: relative; border-top: 5px solid #6a11cb;">
+        <h3
+            style="background: linear-gradient(45deg, #6a11cb, #2575fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+            ✨ {{ _('Generar Arte Promocional con IA') }}
+        </h3>
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">
+            {{ _('Describe qué tipo de imagen necesitas (poster, trofeo, acción) y nuestro motor de IA la creará para
+            ti.') }}
+        </p>
+        <form action="{{ url_for('marketing.request_ai_generation') }}" method="post">
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Descripción de la Imagen (Prompt)') }}</label>
+                <textarea name="prompt" rows="4"
+                    placeholder="Ej: Un poster de fútbol moderno con luces de estadio y balones de oro..."
+                    style="width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px;" required></textarea>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Asociar a Torneo') }}</label>
+                <select name="tournament_id" style="width: 100%;">
+                    {% for t in tournaments %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary"
+                    onclick="document.getElementById('generateAIModal').style.display='none'">{{ _('Cerrar') }}</button>
+                <button type="submit" class="btn" style="background: linear-gradient(45deg, #6a11cb, #2575fc);">
+                    🚀 {{ _('Comenzar Generación') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="addPrizeModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div class="card" style="width: 500px; margin: 100px auto; position: relative;">
+        <h3>🏆 {{ _('Configurar Nuevo Premio') }}</h3>
+        <form action="{{ url_for('marketing.add_prize') }}" method="post">
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Torneo') }}</label>
+                <select name="tournament_id" style="width: 100%;" required>
+                    {% for t in tournaments %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label>{{ _('Rango / Categoría') }}</label>
+                    <input type="text" name="rank" placeholder="e.g., 1er Lugar" required style="width: 100%;">
+                </div>
+                <div>
+                    <label>{{ _('Nombre del Premio') }}</label>
+                    <input type="text" name="title" placeholder="e.g., Trofeo de Oro" required style="width: 100%;">
+                </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Valor / Recompensa') }}</label>
+                <input type="text" name="reward_value" placeholder="e.g., $1000 + Medalla" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label>{{ _('Descripción') }}</label>
+                <textarea name="description" rows="3" style="width: 100%;"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary"
+                    onclick="document.getElementById('addPrizeModal').style.display='none'">{{ _('Cancelar') }}</button>
+                <button type="submit" class="btn">{{ _('Guardar Premio') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="uploadAssetModal"
+    style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div class="card" style="width: 450px; margin: 100px auto; position: relative;">
+        <h3>📤 {{ _('Subir Material Promocional') }}</h3>
+        <form action="{{ url_for('marketing.upload_asset') }}" method="post" enctype="multipart/form-data">
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Título') }}</label>
+                <input type="text" name="title" placeholder="e.g., Poster Jornada 1" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Vincular a Torneo (Opcional)') }}</label>
+                <select name="tournament_id" style="width: 100%;">
+                    <option value="">-- Sin Torneo Escpecífico --</option>
+                    {% for t in tournaments %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>{{ _('Tipo de Contenido') }}</label>
+                <select name="type" style="width: 100%;">
+                    <option value="image">🖼️ Imagen (JPG, PNG)</option>
+                    <option value="video">📹 Video (MP4)</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label>{{ _('Seleccionar Archivo') }}</label>
+                <input type="file" name="file" required style="width: 100%;">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary"
+                    onclick="document.getElementById('uploadAssetModal').style.display='none'">{{ _('Cancelar')
+                    }}</button>
+                <button type="submit" class="btn">{{ _('Subir Ahora') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

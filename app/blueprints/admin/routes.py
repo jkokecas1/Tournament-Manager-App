@@ -1,11 +1,12 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import db
-from app.models import User, Tournament, Team, Configuration
+from app.models import User, Tournament, Team, Configuration, Match, TournamentCategory
 from app.utils.decorators import admin_required
 from . import admin_bp
 import os
 from werkzeug.utils import secure_filename
 from flask import current_app
+from sqlalchemy import func
 
 @admin_bp.route('/admin')
 @admin_required
@@ -14,19 +15,16 @@ def admin_panel():
         'user_count': User.query.count(),
         'tournament_count': Tournament.query.count(),
         'team_count': Team.query.count(),
-        'match_count': Match.query.count() if 'Match' in globals() else 0 # Need to import Match
+        'match_count': Match.query.count()
     }
-    # Fix: need model imports
-    from app.models import Match
-    stats['match_count'] = Match.query.count()
-    
     return render_template('admin.html', stats=stats)
 
 @admin_bp.route('/admin/tournaments')
 @admin_required
 def manage_tournaments():
     tournaments = Tournament.query.all()
-    return render_template('tournaments_management.html', tournaments=tournaments)
+    categories = TournamentCategory.query.all()
+    return render_template('tournaments_management.html', tournaments=tournaments, categories=categories)
 
 @admin_bp.route('/admin/users', methods=['GET', 'POST'])
 @admin_required
@@ -118,6 +116,49 @@ def company_logo():
     else:
         # Return default image or 404
         return redirect(url_for('static', filename='img/default_logo.png'))
+
+@admin_bp.route('/admin/teams')
+@admin_required
+def manage_teams():
+    teams = Team.query.join(Tournament).order_by(Tournament.name, Team.name).all()
+    return render_template('teams_management.html', teams=teams)
+
+@admin_bp.route('/admin/categories', methods=['GET', 'POST'])
+@admin_required
+def manage_categories():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        if name:
+            new_cat = TournamentCategory(name=name)
+            db.session.add(new_cat)
+            try:
+                db.session.commit()
+                flash("Categoría añadida con éxito.")
+            except:
+                db.session.rollback()
+                flash("Error: La categoría ya existe o datos inválidos.")
+    
+    categories = TournamentCategory.query.all()
+    # Also fetch categories from old string field for migration context if needed
+    old_categories = db.session.query(
+        Tournament.category, 
+        func.count(Tournament.id).label('count')
+    ).group_by(Tournament.category).all()
+    
+    return render_template('categories_management.html', categories=categories, old_categories=old_categories)
+
+@admin_bp.route('/admin/delete_category/<int:cat_id>', methods=['POST'])
+@admin_required
+def delete_category(cat_id):
+    cat = db.session.get(TournamentCategory, cat_id)
+    if cat:
+        if cat.tournaments:
+            flash("No se puede eliminar una categoría en uso.")
+        else:
+            db.session.delete(cat)
+            db.session.commit()
+            flash("Categoría eliminada.")
+    return redirect(url_for('admin.manage_categories'))
 
 @admin_bp.route('/set_language/<lang>')
 def set_language(lang):

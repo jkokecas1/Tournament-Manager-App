@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2>{{ _('Schedule') }}</h2>
-    <button onclick="exportScheduleAsImage()" class="btn btn-primary">
-        {{ _('Export as Image') }}
+{% block layout_content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">{{ _('📅 Calendario de Partidos') }}</h2>
+    <button onclick="exportScheduleAsImage()" class="btn btn-primary" style="font-size: 0.9em;">
+        📸 {{ _('Exportar como Imagen') }}
     </button>
 </div>
 
@@ -16,14 +16,14 @@
         <button onclick="closeModal()"
             style="position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: bold;">×</button>
 
-        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">{{ _('Schedule Image') }}</h3>
+        <h3 style="margin-top: 0; color: #2c3e50; text-align: center;">{{ _('Imagen del Calendario') }}</h3>
 
         <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
             <button onclick="copyToClipboard()" class="btn btn-primary">
-                📋 {{ _('Copy to Clipboard') }}
+                📋 {{ _('Copiar portapapeles') }}
             </button>
             <button onclick="downloadImage()" class="btn btn-primary">
-                💾 {{ _('Download') }}
+                💾 {{ _('Descargar') }}
             </button>
         </div>
         <div style="text-align: center; margin: 20px 0;">
@@ -32,7 +32,7 @@
         </div>
         <div id="copyMessage"
             style="display: none; text-align: center; margin-top: 15px; padding: 10px; background: #d4edda; color: #155724; border-radius: 5px; font-weight: 600;">
-            ✅ {{ _('Image copied to clipboard!') }}
+            ✅ {{ _('¡Imagen copiada!') }}
         </div>
     </div>
 </div>
@@ -40,7 +40,7 @@
 <!-- Hidden container for image export -->
 <div id="exportContainer"
     style="position: absolute; left: -9999px; top: -9999px; background: white; padding: 40px; width: 1200px; z-index: -9999; visibility: hidden;">
-    <!-- Header with logo, company name, and tournament -->
+    <!-- Export Header -->
     <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2c3e50; padding-bottom: 20px;">
         {% if site_config and site_config.company_logo %}
         <img src="{{ url_for('static', filename='uploads/' + site_config.company_logo) }}" alt="Logo"
@@ -49,31 +49,16 @@
         <h1 style="margin: 10px 0; color: #2c3e50; font-size: 32px;">
             {{ site_config.company_name if site_config and site_config.company_name else 'Tournament Manager' }}
         </h1>
-        <h2 style="margin: 5px 0; color: #34495e; font-size: 24px;">{{ t.name }} - {{ _('Schedule') }}</h2>
-        {% if selected_matchday or selected_team %}
-        <p style="margin: 5px 0; color: #7f8c8d; font-size: 16px;">
-            {% if selected_matchday %}{{ _('Matchday') }} {{ selected_matchday }}{% endif %}
-            {% if selected_matchday and selected_team %} - {% endif %}
-            {% if selected_team %}
-            {% for team in teams %}
-            {% if team.id|string == selected_team %}{{ team.name }}{% endif %}
-            {% endfor %}
-            {% endif %}
-        </p>
-        {% endif %}
+        <h2 style="margin: 5px 0; color: #34495e; font-size: 24px;">{{ t.name }} - {{ _('Calendario') }}</h2>
     </div>
 
-    <!-- Schedule table -->
-    <table id="scheduleTableExport"
-        style="width: 100%; border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <!-- Export Table -->
+    <table id="scheduleTableExport" style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr style="background: #2c3e50; color: black;">
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Matchday') }}</th>
-                <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">{{ _('Match') }}</th>
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Result') }}</th>
-                {% if current_user and current_user.role == 'admin' %}
-                <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">{{ _('Actions') }}</th>
-                {% endif %}
+            <tr style="background: #2c3e50; color: white;">
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('Jornada') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('Partido') }}</th>
+                <th style="padding: 12px; border: 1px solid #ddd;">{{ _('Resultado') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -83,40 +68,153 @@
                     match.matchday }}</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <span style="text-align: right; flex: 1;"><strong>{{ match.home_team.name }}</strong>
-                            {% if not match.home_team.is_active %}<span style="color: #e74c3c; font-size: 0.8em;">({{
-                                _('Withdrawn') }})</span>{% endif %}
-                        </span>
+                        <span style="text-align: right; flex: 1;"><strong>{{ match.home_team.name }}</strong></span>
                         <span style="color: #7f8c8d;">vs</span>
-                        <span style="text-align: left; flex: 1;"><strong>{{ match.away_team.name }}</strong>
-                            {% if not match.away_team.is_active %}<span style="color: #e74c3c; font-size: 0.8em;">({{
-                                _('Withdrawn') }})</span>{% endif %}
-                        </span>
+                        <span style="text-align: left; flex: 1;"><strong>{{ match.away_team.name }}</strong></span>
                     </div>
-                    {% if match.referee %}
-                    <div style="text-align: center; margin-top: 5px; font-size: 12px; color: #999;">👮 {{
-                        match.referee.username }}</div>
-                    {% endif %}
                 </td>
                 <td
                     style="padding: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; font-size: 16px;">
-                    {% if match.played %}
-                    {{ match.home_score }} - {{ match.away_score }}
+                    {{ (match.home_score ~ ' - ' ~ match.away_score) if match.played else '-' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card" style="margin-bottom: 25px; background: #fff; border-bottom: 3px solid #3498db;">
+    <form method="get" action="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}"
+        style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+
+        <div style="flex: 2; min-width: 250px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">{{ _('Filtrar por
+                Jornada:') }}</label>
+            <div style="display: flex; gap: 5px;">
+                {% if selected_matchday and selected_matchday|int > min_matchday %}
+                <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id, matchday=selected_matchday|int - 1, team_id=selected_team) }}"
+                    class="btn btn-secondary" style="padding: 8px 12px; text-decoration: none;">&laquo;</a>
+                {% else %}
+                <button type="button" class="btn btn-secondary"
+                    style="padding: 8px 12px; opacity: 0.5; cursor: not-allowed;" disabled>&laquo;</button>
+                {% endif %}
+
+                <select name="matchday" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">{{ _('Todas las Jornadas') }}</option>
+                    {% for md in matchdays %}
+                    <option value="{{ md }}" {% if selected_matchday==md %}selected{% endif %}>{{ _('Jornada') }} {{ md
+                        }}</option>
+                    {% endfor %}
+                </select>
+
+                {% if selected_matchday and selected_matchday|int < max_matchday %} <a
+                    href="{{ url_for('tournaments.tournament_schedule', t_id=t.id, matchday=selected_matchday|int + 1, team_id=selected_team) }}"
+                    class="btn btn-secondary" style="padding: 8px 12px; text-decoration: none;">&raquo;</a>
                     {% else %}
-                    -
+                    <button type="button" class="btn btn-secondary"
+                        style="padding: 8px 12px; opacity: 0.5; cursor: not-allowed;" disabled>&raquo;</button>
+                    {% endif %}
+            </div>
+        </div>
+
+        <div style="flex: 2; min-width: 250px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #555;">{{ _('Filtrar por
+                Equipo:') }}</label>
+            <select name="team_id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">{{ _('Todos los Equipos') }}</option>
+                {% for team in teams %}
+                <option value="{{ team.id }}" {% if selected_team==team.id|string %}selected{% endif %}>{{ team.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary" style="height: 40px; padding: 0 20px;">{{ _('Filtrar')
+                }}</button>
+            <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}" class="btn btn-secondary"
+                style="text-decoration: none; height: 40px; line-height: 25px; display: inline-block;">{{ _('Limpiar')
+                }}</a>
+        </div>
+    </form>
+</div>
+
+{% if matches %}
+<div class="card" style="padding: 0; overflow: hidden; border: 1px solid #eee;">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+        <thead style="background: #f8f9fa;">
+            <tr>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 100px;">{{ _('Jornada') }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; text-align: left;">{{ _('Partido') }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 120px; text-align: center;">{{
+                    _('Hora') }}</th>
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 100px; text-align: center;">{{
+                    _('Res.') }}</th>
+                {% if current_user and (current_user.role == 'admin' or current_user.role == 'referee') %}
+                <th style="padding: 15px; border-bottom: 2px solid #dee2e6; width: 150px; text-align: right;">{{
+                    _('Acciones') }}</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in matches %}
+            <tr style="border-bottom: 1px solid #f1f3f5;">
+                <td style="padding: 15px; text-align: center; font-weight: bold; color: var(--augment);">{{
+                    match.matchday }}</td>
+                <td style="padding: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div
+                            style="flex: 1; text-align: right; display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                            {% if not match.home_team.is_active %}<span class="badge"
+                                style="background: #e74c3c; color: white;">{{ _('Retirado') }}</span>{% endif %}
+                            <strong>{{ match.home_team.name }}</strong>
+                            {% if match.home_team.logo_data %}
+                            <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=match.home_team.id) }}"
+                                class="team-logo" style="width: 24px; height: 24px;">
+                            {% endif %}
+                        </div>
+                        <span style="color: #adb5bd; font-size: 0.8em; font-weight: bold;">VS</span>
+                        <div style="flex: 1; text-align: left; display: flex; align-items: center; gap: 8px;">
+                            {% if match.away_team.logo_data %}
+                            <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=match.away_team.id) }}"
+                                class="team-logo" style="width: 24px; height: 24px;">
+                            {% endif %}
+                            <strong>{{ match.away_team.name }}</strong>
+                            {% if not match.away_team.is_active %}<span class="badge"
+                                style="background: #e74c3c; color: white;">{{ _('Retirado') }}</span>{% endif %}
+                        </div>
+                    </div>
+                </td>
+                <td style="padding: 15px; text-align: center; color: #6c757d; font-size: 0.9rem;">
+                    {% if match.start_time %}
+                    {{ match.start_time.strftime('%H:%M') }}
+                    {% else %}
+                    <span style="color: #dee2e6; font-style: italic;">{{ _('Pte.') }}</span>
                     {% endif %}
                 </td>
-                {% if current_user and current_user.role == 'admin' %}
-                <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
-                    {% if not match.played %}
-                    <button
-                        onclick="openWalkoverModal({{ match.id }}, '{{ match.home_team.name }}', '{{ match.away_team.name }}')"
-                        class="btn" style="background-color: #f39c12; font-size: 0.8em; padding: 5px 10px;">
-                        ⚠️ {{ _('Walkover') }}
-                    </button>
-                    {% else %}
-                    <span style="color: #95a5a6;">-</span>
-                    {% endif %}
+                <td style="padding: 15px; text-align: center; font-weight: 800; font-size: 1.1rem;">
+                    {{ (match.home_score ~ ' - ' ~ match.away_score) if match.played else '-' }}
+                </td>
+                {% if current_user and (current_user.role == 'admin' or current_user.role == 'referee') %}
+                <td style="padding: 15px; text-align: right;">
+                    <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                        <a href="{{ url_for('tournaments.match_detail', t_id=t.id, m_id=match.id) }}"
+                            class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.75em;">
+                            {{ _('Editar') if match.played else _('Anotar') }}
+                        </a>
+                        {% if current_user.role == 'admin' and not match.played %}
+                        <button
+                            onclick="openChangeMatchdayModal({{ match.id }}, {{ match.matchday }}, '{{ match.home_team.name }}', '{{ match.away_team.name }}')"
+                            class="btn" style="background-color: #3498db; font-size: 0.75em; padding: 5px 10px;">
+                            🔄
+                        </button>
+                        <button
+                            onclick="openWalkoverModal({{ match.id }}, '{{ match.home_team.name }}', '{{ match.away_team.name }}')"
+                            class="btn" style="background-color: #f39c12; font-size: 0.75em; padding: 5px 10px;">
+                            🚩
+                        </button>
+                        {% endif %}
+                    </div>
                 </td>
                 {% endif %}
             </tr>
@@ -124,145 +222,11 @@
         </tbody>
     </table>
 </div>
-
-<form method="get" action="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}"
-    style="background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end;">
-
-    <div style="flex: 1;">
-        <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">{{ _('Filter by Matchday:')
-            }}</label>
-        <div style="display: flex; gap: 5px;">
-            {% if selected_matchday and selected_matchday|int > min_matchday %}
-            <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id, matchday=selected_matchday|int - 1, team_id=selected_team) }}"
-                class="btn btn-secondary" style="padding: 8px 12px; text-decoration: none;">&laquo;</a>
-            {% else %}
-            <button type="button" class="btn btn-secondary"
-                style="padding: 8px 12px; opacity: 0.5; cursor: not-allowed;" disabled>&laquo;</button>
-            {% endif %}
-
-            <select name="matchday"
-                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0;">
-                <option value="">{{ _('All Matchdays') }}</option>
-                {% for md in matchdays %}
-                <option value="{{ md }}" {% if selected_matchday==md %}selected{% endif %}>{{ _('Matchday') }} {{ md
-                    }}</option>
-                {% endfor %}
-            </select>
-
-            {% if selected_matchday and selected_matchday|int < max_matchday %} <a
-                href="{{ url_for('tournaments.tournament_schedule', t_id=t.id, matchday=selected_matchday|int + 1, team_id=selected_team) }}"
-                class="btn btn-secondary" style="padding: 8px 12px; text-decoration: none;">&raquo;</a>
-                {% elif not selected_matchday and matchdays %}
-                <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id, matchday=min_matchday, team_id=selected_team) }}"
-                    class="btn btn-secondary" style="padding: 8px 12px; text-decoration: none;">&raquo;</a>
-                {% else %}
-                <button type="button" class="btn btn-secondary"
-                    style="padding: 8px 12px; opacity: 0.5; cursor: not-allowed;" disabled>&raquo;</button>
-                {% endif %}
-        </div>
-    </div>
-
-    <div style="flex: 1;">
-        <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #555;">{{ _('Filter by Team:')
-            }}</label>
-        <select name="team_id"
-            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0;">
-            <option value="">{{ _('All Teams') }}</option>
-            {% for team in teams %}
-            <option value="{{ team.id }}" {% if selected_team==team.id|string %}selected{% endif %}>{{ team.name }}
-            </option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <button type="submit" class="btn" style="height: 40px;">{{ _('Filter') }}</button>
-    <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}" class="btn btn-secondary"
-        style="text-decoration: none; height: 40px; line-height: 20px; box-sizing: border-box;">{{ _('Clear') }}</a>
-</form>
-
-{% if matches %}
-<table>
-    <thead>
-        <tr>
-            <th>{{ _('Matchday') }}</th>
-            <th>{{ _('Match') }}</th>
-            <th>{{ _('Result') }}</th>
-            {% if current_user and (current_user.role == 'admin' or current_user.role == 'referee') %}
-            <th>{{ _('Action') }}</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for match in matches %}
-        <tr>
-            <td>{{ match.matchday }}</td>
-            <td>
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <span style="display: flex; align-items: center; justify-content: flex-end; gap: 5px; flex: 1;">
-                        {% if not match.home_team.is_active %}<span class="badge"
-                            style="background: #e74c3c; color: white; padding: 2px 6px; font-size: 0.7em;">{{
-                            _('Withdrawn') }}</span>{% endif %}
-                        <!-- Home Team Logo -->
-                        {% if match.home_team.logo_data %}
-                        <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=match.home_team.id) }}"
-                            alt="{{ match.home_team.name }}" class="team-logo">
-                        {% else %}
-                        <div class="team-logo-placeholder">
-                            {{ match.home_team.name[0] }}
-                        </div>
-                        {% endif %}
-                        {{ match.home_team.name }}
-                    </span>
-                    <span>vs</span>
-                    <span style="display: flex; align-items: center; justify-content: flex-start; gap: 5px; flex: 1;">
-                        <!-- Away Team Logo -->
-                        {% if match.away_team.logo_data %}
-                        <img src="{{ url_for('tournaments.team_logo', t_id=t.id, team_id=match.away_team.id) }}"
-                            alt="{{ match.away_team.name }}" class="team-logo">
-                        {% else %}
-                        <div class="team-logo-placeholder">
-                            {{ match.away_team.name[0] }}
-                        </div>
-                        {% endif %}
-                        {{ match.away_team.name }}
-                        {% if not match.away_team.is_active %}<span class="badge"
-                            style="background: #e74c3c; color: white; padding: 2px 6px; font-size: 0.7em;">{{
-                            _('Withdrawn') }}</span>{% endif %}
-                    </span>
-                </div>
-                {% if match.referee %}
-                <br><small style="color: #999;">👮 {{ match.referee.username }}</small>
-                {% endif %}
-            </td>
-            <td>
-                {% if match.played %}
-                <strong>{{ match.home_score }} - {{ match.away_score }}</strong>
-                {% else %}
-                -
-                {% endif %}
-            </td>
-            {% if current_user and (current_user.role == 'admin' or current_user.role == 'referee') %}
-            <td>
-                <a href="{{ url_for('tournaments.match_detail', t_id=t.id, m_id=match.id) }}" class="btn btn-secondary"
-                    style="padding: 5px 10px; font-size: 0.8em;">
-                    {% if match.played %}{{ _('Edit') }}{% else %}{{ _('Update') }}{% endif %}
-                </a>
-                {% if current_user.role == 'admin' and not match.played %}
-                <button
-                    onclick="openChangeMatchdayModal({{ match.id }}, {{ match.matchday }}, '{{ match.home_team.name }}', '{{ match.away_team.name }}')"
-                    class="btn"
-                    style="background-color: #3498db; font-size: 0.8em; padding: 5px 10px; margin-left: 5px;">
-                    🔄 {{ _('Reschedule') }}
-                </button>
-                {% endif %}
-            </td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% else %}
-<p>{{ _('No matches scheduled yet.') }}</p>
+<div class="card" style="text-align: center; padding: 50px; color: #adb5bd;">
+    <div style="font-size: 3rem; margin-bottom: 15px;">📅</div>
+    <p>{{ _('No hay partidos programados aún.') }}</p>
+</div>
 {% endif %}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -272,8 +236,6 @@
 
     function exportScheduleAsImage() {
         const exportContainer = document.getElementById('exportContainer');
-
-        // Make visible for capture but behind everything else
         exportContainer.style.visibility = 'visible';
         exportContainer.style.opacity = '1';
         exportContainer.style.position = 'fixed';
@@ -281,36 +243,16 @@
         exportContainer.style.top = '0';
         exportContainer.style.zIndex = '-9999';
 
-        // Small delay to ensure the browser has actually rendered the element
         setTimeout(() => {
             html2canvas(exportContainer, {
                 scale: 2,
                 backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-                allowTaint: true,
-                scrollX: 0,
-                scrollY: 0,
-                windowWidth: 1280,
-                windowHeight: 720
+                useCORS: true
             }).then(canvas => {
-                // Hide the container again
                 exportContainer.style.visibility = 'hidden';
                 exportContainer.style.opacity = '0';
-                exportContainer.style.position = 'absolute';
-                exportContainer.style.left = '-9999px';
-                exportContainer.style.top = '-9999px';
-                exportContainer.style.zIndex = '-9999';
-
-                // Store the image data
                 generatedImageDataUrl = canvas.toDataURL('image/png');
-
-                // Convert to blob for clipboard
-                canvas.toBlob(blob => {
-                    generatedImageBlob = blob;
-                }, 'image/png');
-
-                // Show modal with preview
+                canvas.toBlob(blob => { generatedImageBlob = blob; }, 'image/png');
                 document.getElementById('previewImage').src = generatedImageDataUrl;
                 document.getElementById('imageModal').style.display = 'flex';
             });
@@ -327,180 +269,90 @@
             if (generatedImageBlob) {
                 const item = new ClipboardItem({ 'image/png': generatedImageBlob });
                 await navigator.clipboard.write([item]);
-
-                // Show success message
-                const message = document.getElementById('copyMessage');
-                message.style.display = 'block';
-                setTimeout(() => {
-                    message.style.display = 'none';
-                }, 3000);
+                document.getElementById('copyMessage').style.display = 'block';
+                setTimeout(() => { document.getElementById('copyMessage').style.display = 'none'; }, 3000);
             }
-        } catch (err) {
-            alert('{{ _("Error copying to clipboard. Please try downloading instead.") }}');
-            console.error('Error copying to clipboard:', err);
-        }
+        } catch (err) { alert('Error al copiar.'); }
     }
 
     function downloadImage() {
         const link = document.createElement('a');
-        let filename = 'calendario_{{ t.name|replace(" ", "_") }}';
-        {% if selected_matchday %}
-        filename += '_jornada_{{ selected_matchday }}';
-        {% endif %}
-        link.download = filename + '.png';
+        link.download = 'calendario_{{ t.name|replace(" ", "_") }}.png';
         link.href = generatedImageDataUrl;
         link.click();
     }
-
-    // Close modal when clicking outside
-    document.getElementById('imageModal').addEventListener('click', function (e) {
-        if (e.target === this) {
-            closeModal();
-        }
-    });
 </script>
 
-<!-- Walkover Modal -->
+<!-- Modals -->
 <div id="walkoverModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%;">
-        <h3 style="margin-top: 0; color: #2c3e50;">⚠️ {{ _('Mark Match as Walkover') }}</h3>
-        <p style="color: #7f8c8d; margin-bottom: 20px;">
-            {{ _('Select the team that WINS by walkover. The match will be marked as 3-0.') }}
-        </p>
-
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 25px; border-radius: 12px; width: 400px; max-width: 90%;">
+        <h3>🚩 {{ _('Registrar Walkover') }}</h3>
+        <p id="walkoverInfo"></p>
         <form id="walkoverForm" method="post">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
-                    {{ _('Winning Team:') }}
-                </label>
-                <div style="display: flex; gap: 15px; flex-direction: column;">
-                    <label
-                        style="padding: 15px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                        <input type="radio" name="winner" value="home" required style="width: 20px; height: 20px;">
-                        <span id="homeTeamName" style="font-weight: bold; font-size: 1.1em;"></span>
-                    </label>
-                    <label
-                        style="padding: 15px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                        <input type="radio" name="winner" value="away" required style="width: 20px; height: 20px;">
-                        <span id="awayTeamName" style="font-weight: bold; font-size: 1.1em;"></span>
-                    </label>
-                </div>
+            <div style="margin: 15px 0;">
+                <label><input type="radio" name="winner" value="home" required> <span id="homeWon"></span>
+                    (3-0)</label><br>
+                <label><input type="radio" name="winner" value="away" required> <span id="awayWon"></span> (0-3)</label>
             </div>
+            <div style="text-align: right;">
+                <button type="button" onclick="closeWalkoverModal()" class="btn btn-secondary">{{ _('Cerrar')
+                    }}</button>
+                <button type="submit" class="btn btn-primary" style="background: #f39c12;">{{ _('Confirmar') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="closeWalkoverModal()" class="btn" style="background-color: #95a5a6;">
-                    {{ _('Cancel') }}
-                </button>
-                <button type="submit" class="btn" style="background-color: #f39c12;">
-                    {{ _('Confirm Walkover') }}
-                </button>
+<div id="changeMatchdayModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 25px; border-radius: 12px; width: 400px; max-width: 90%;">
+        <h3>🔄 {{ _('Reprogramar Jornada') }}</h3>
+        <form id="cmForm" method="post">
+            <input type="number" name="new_matchday" id="nmInput" min="1" required
+                style="width: 100%; margin-bottom: 20px;">
+            <div style="text-align: right;">
+                <button type="button" onclick="closeChangeMatchdayModal()" class="btn btn-secondary">{{ _('Cerrar')
+                    }}</button>
+                <button type="submit" class="btn btn-primary">{{ _('Guardar') }}</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    let currentMatchId = null;
-
-    function openWalkoverModal(matchId, homeTeam, awayTeam) {
-        currentMatchId = matchId;
-        document.getElementById('homeTeamName').textContent = homeTeam;
-        document.getElementById('awayTeamName').textContent = awayTeam;
+    let cwId = null;
+    function openWalkoverModal(id, h, a) {
+        cwId = id;
+        document.getElementById('homeWon').textContent = h;
+        document.getElementById('awayWon').textContent = a;
         document.getElementById('walkoverModal').style.display = 'flex';
     }
-
-    function closeWalkoverModal() {
-        document.getElementById('walkoverModal').style.display = 'none';
-        document.getElementById('walkoverForm').reset();
-        currentMatchId = null;
-    }
-
-    document.getElementById('walkoverForm').addEventListener('submit', function (e) {
+    function closeWalkoverModal() { document.getElementById('walkoverModal').style.display = 'none'; }
+    document.getElementById('walkoverForm').onsubmit = (e) => {
         e.preventDefault();
         const winner = document.querySelector('input[name="winner"]:checked').value;
         const form = document.createElement('form');
         form.method = 'post';
-        form.action = `/t/{{ t.id }}/match/${currentMatchId}/walkover`;
+        form.action = `/t/{{ t.id }}/match/${cwId}/walkover`;
+        const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = 'winner'; inp.value = winner;
+        form.appendChild(inp); document.body.appendChild(form); form.submit();
+    };
 
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'winner';
-        input.value = winner;
-        form.appendChild(input);
-
-        document.body.appendChild(form);
-        form.submit();
-    });
-</script>
-
-<!-- Change Matchday Modal -->
-<div id="changeMatchdayModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 400px; width: 90%;">
-        <h3 style="margin-top: 0; color: #2c3e50;">🔄 {{ _('Reschedule Match') }}</h3>
-        <p style="color: #7f8c8d; margin-bottom: 15px;">
-            <strong id="matchInfo"></strong>
-        </p>
-        <p style="color: #7f8c8d; margin-bottom: 20px; font-size: 0.9em;">
-            {{ _('Current Matchday:') }} <strong id="currentMatchday"></strong>
-        </p>
-
-        <form id="changeMatchdayForm" method="post">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 10px; font-weight: bold;">
-                    {{ _('New Matchday:') }}
-                </label>
-                <input type="number" name="new_matchday" id="newMatchdayInput" min="1" required
-                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1.1em;">
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="closeChangeMatchdayModal()" class="btn"
-                    style="background-color: #95a5a6;">
-                    {{ _('Cancel') }}
-                </button>
-                <button type="submit" class="btn" style="background-color: #3498db;">
-                    {{ _('Confirm') }}
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    let currentChangeMatchId = null;
-
-    function openChangeMatchdayModal(matchId, currentMatchday, homeTeam, awayTeam) {
-        currentChangeMatchId = matchId;
-        document.getElementById('matchInfo').textContent = homeTeam + ' vs ' + awayTeam;
-        document.getElementById('currentMatchday').textContent = currentMatchday;
+    let cmId = null;
+    function openChangeMatchdayModal(id, current, h, a) {
+        cmId = id;
+        document.getElementById('nmInput').value = current;
         document.getElementById('changeMatchdayModal').style.display = 'flex';
-        document.getElementById('newMatchdayInput').value = '';
-        document.getElementById('newMatchdayInput').focus();
     }
-
-    function closeChangeMatchdayModal() {
-        document.getElementById('changeMatchdayModal').style.display = 'none';
-        document.getElementById('changeMatchdayForm').reset();
-        currentChangeMatchId = null;
-    }
-
-    document.getElementById('changeMatchdayForm').addEventListener('submit', function (e) {
+    function closeChangeMatchdayModal() { document.getElementById('changeMatchdayModal').style.display = 'none'; }
+    document.getElementById('cmForm').onsubmit = (e) => {
         e.preventDefault();
-        const newMatchday = document.getElementById('newMatchdayInput').value;
         const form = document.createElement('form');
         form.method = 'post';
-        form.action = `/t/{{ t.id }}/match/${currentChangeMatchId}/change_matchday`;
-
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'new_matchday';
-        input.value = newMatchday;
-        form.appendChild(input);
-
-        document.body.appendChild(form);
-        form.submit();
-    });
+        form.action = `/t/{{ t.id }}/match/${cmId}/change_matchday`;
+        const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = 'new_matchday'; inp.value = document.getElementById('nmInput').value;
+        form.appendChild(inp); document.body.appendChild(form); form.submit();
+    };
 </script>
 {% endblock %}

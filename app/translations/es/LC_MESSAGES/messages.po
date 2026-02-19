@@ -746,3 +746,75 @@ msgstr "No se puede reprogramar un partido que ya se ha jugado"
 
 msgid "Invalid matchday number"
 msgstr "Número de jornada inválido"
+
+msgid "Start Time:"
+msgstr "Hora de Inicio:"
+
+msgid "End Time:"
+msgstr "Hora de Fin:"
+
+msgid "Save Changes"
+msgstr "Guardar Cambios"
+
+msgid "Match updated."
+msgstr "Partido actualizado."
+
+msgid "TBD"
+msgstr "Por definir"
+
+msgid "Time"
+msgstr "Hora"
+
+msgid "Listados"
+msgstr "Listados"
+
+msgid "Categorías"
+msgstr "Categorías"
+
+msgid "Acciones"
+msgstr "Acciones"
+
+msgid "Configuraciones"
+msgstr "Configuraciones"
+
+msgid "Usuarios"
+msgstr "Usuarios"
+
+msgid "Torneos"
+msgstr "Torneos"
+
+msgid "Equipos"
+msgstr "Equipos"
+
+msgid "Dashboard de Administración"
+msgstr "Panel de Administración"
+
+msgid "Configuración del Sitio"
+msgstr "Configuración del Sitio"
+
+msgid "Nombre de la Empresa"
+msgstr "Nombre de la Empresa"
+
+msgid "Logo de la Empresa"
+msgstr "Logo de la Empresa"
+
+msgid "Redes Sociales"
+msgstr "Redes Sociales"
+
+msgid "Ver Categorías"
+msgstr "Ver Categorías"
+
+msgid "Crear Torneo"
+msgstr "Crear Torneo"
+
+msgid "Generar Usuarios"
+msgstr "Generar Usuarios"
+
+msgid "Ajustes del Sitio"
+msgstr "Ajustes del Sitio"
+
+msgid "Gestión de Usuarios"
+msgstr "Gestión de Usuarios"
+
+msgid "Gestión de Torneos"
+msgstr "Gestión de Torneos"
