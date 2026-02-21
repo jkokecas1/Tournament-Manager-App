@@ -3,7 +3,7 @@
 {% block layout_content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <h2 style="margin: 0;">{{ _('📅 Calendario de Partidos') }}</h2>
-    <button onclick="exportScheduleAsImage()" class="btn btn-primary" style="font-size: 0.9em;">
+    <button onclick="exportScheduleAsImage(this)" class="btn btn-primary" style="font-size: 0.9em;">
         📸 {{ _('Exportar como Imagen') }}
     </button>
 </div>
@@ -234,7 +234,17 @@
     let generatedImageBlob = null;
     let generatedImageDataUrl = null;
 
-    function exportScheduleAsImage() {
+    let isExporting = false;
+
+    function exportScheduleAsImage(btn) {
+        if (isExporting) return;
+        isExporting = true;
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⌛ {{ _("Generando...") }}';
+        btn.style.opacity = '0.7';
+        btn.style.cursor = 'not-allowed';
+
         const exportContainer = document.getElementById('exportContainer');
         exportContainer.style.visibility = 'visible';
         exportContainer.style.opacity = '1';
@@ -255,6 +265,19 @@
                 canvas.toBlob(blob => { generatedImageBlob = blob; }, 'image/png');
                 document.getElementById('previewImage').src = generatedImageDataUrl;
                 document.getElementById('imageModal').style.display = 'flex';
+
+                // Reset button
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                isExporting = false;
+            }).catch(err => {
+                console.error('Error generating image:', err);
+                btn.innerHTML = originalText;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                isExporting = false;
+                alert('Error al generar la imagen.');
             });
         }, 100);
     }

@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "sidebar_layout.html" %}
 
-{% block content %}
+{% block layout_content %}
 <h2>{{ _('Match Details') }}</h2>
 <p>
     <strong>Matchday {{ match.matchday }}</strong><br>
@@ -13,85 +13,87 @@
     </span>
 </p>
 
-<!-- Admin: Assign Referee -->
-{% if current_user and current_user.role == 'admin' %}
-<form action="{{ url_for('tournaments.match_detail', t_id=t.id, m_id=match.id) }}" method="post"
-    style="margin-bottom: 20px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
-    <label>{{ _('Assign Referee:') }}</label>
-    <select name="referee_id">
-        <option value="">-- None --</option>
-        {% for r in referees %}
-        <option value="{{ r.id }}" {% if match.referee_id==r.id %}selected{% endif %}>{{ r.username }}</option>
-        {% endfor %}
-    </select>
-
-    <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
-        <div>
-            <label style="display: block; font-size: 0.9em; margin-bottom: 2px;">{{ _('Start Time:') }}</label>
-            <input type="time" name="start_time" value="{{ match.start_time.strftime('%H:%M') if match.start_time }}"
-                style="padding: 5px;">
-        </div>
-        <div>
-            <label style="display: block; font-size: 0.9em; margin-bottom: 2px;">{{ _('End Time:') }}</label>
-            <input type="time" name="end_time" value="{{ match.end_time.strftime('%H:%M') if match.end_time }}"
-                style="padding: 5px;">
-        </div>
-    </div>
-
-    <button type="submit" class="btn btn-secondary" style="margin-top: 15px; font-size: 0.8em; padding: 5px 15px;">{{
-        _('Save Changes') }}</button>
-</form>
-{% endif %}
-
-<!-- Score Board -->
-<div class="card" style="text-align: center;">
-    <h3>{{ home_team.name }} vs {{ away_team.name }}</h3>
-
-    <form action="{{ url_for('tournaments.match_detail', t_id=t.id, m_id=match.id) }}" method="post">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 2em;">
-            <input type="number" name="home_score" value="{{ match.home_score }}"
-                style="width: 80px; text-align: center;">
-            <span>-</span>
-            <input type="number" name="away_score" value="{{ match.away_score }}"
-                style="width: 80px; text-align: center;">
-        </div>
-        <br>
-        <button type="submit" class="btn">{{ _('Update Score') }}</button>
-    </form>
-</div>
-
-<!-- Events List -->
-<div class="card">
-    <h3>{{ _('📢 Match Events') }}</h3>
-    <ul>
-        {% for event in match.events %}
-        <li>
-            <strong>{{ event.minute }}'</strong>
-
-            {% if players[event.player_id] %}
-            {{ players[event.player_id].name }}
-            {% else %}
-            {{ _('Unknown Player') }}
-            {% endif %}
-
-            {% if event.type == 'goal' %}
-            ⚽ {{ _('Goal') }}
-            {% elif event.type == 'yellow' %}
-            🟨 {{ _('Yellow Card') }}
-            {% elif event.type == 'red' %}
-            🟥 {{ _('Red Card') }}
-            {% endif %}
-
-            ({{ _('Home') if event.team_id == home_team.id else _('Away') }})
-        </li>
-        {% else %}
-        <li>{{ _('No events recorded.') }}</li>
-        {% endfor %}
-    </ul>
-</div>
-
 <!-- Add Event Forms -->
 <div class="grid">
+    <div class="card" style="text-align: center;">
+        <!-- Admin: Assign Referee -->
+        {% if current_user and current_user.role == 'admin' %}
+        <form action="{{ url_for('tournaments.match_detail', t_id=t.id, m_id=match.id) }}" method="post"
+            style="margin-bottom: 20px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
+            <label>{{ _('Assign Referee:') }}</label>
+            <select name="referee_id">
+                <option value="">-- None --</option>
+                {% for r in referees %}
+                <option value="{{ r.id }}" {% if match.referee_id==r.id %}selected{% endif %}>{{ r.username }}</option>
+                {% endfor %}
+            </select>
+
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.9em; margin-bottom: 2px;">{{ _('Start Time:') }}</label>
+                    <input type="time" name="start_time"
+                        value="{{ match.start_time.strftime('%H:%M') if match.start_time }}" style="padding: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.9em; margin-bottom: 2px;">{{ _('End Time:') }}</label>
+                    <input type="time" name="end_time" value="{{ match.end_time.strftime('%H:%M') if match.end_time }}"
+                        style="padding: 5px;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary"
+                style="margin-top: 15px; font-size: 0.8em; padding: 5px 15px;">{{
+                _('Save Changes') }}</button>
+        </form>
+        {% endif %}
+    </div>
+    <!-- Score Board -->
+    <div class="card" style="text-align: center;">
+        <h3>{{ home_team.name }} vs {{ away_team.name }}</h3>
+
+        <form action="{{ url_for('tournaments.match_detail', t_id=t.id, m_id=match.id) }}" method="post">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 2em;">
+                <input type="number" name="home_score" value="{{ match.home_score }}"
+                    style="width: 80px; text-align: center;">
+                <span>-</span>
+                <input type="number" name="away_score" value="{{ match.away_score }}"
+                    style="width: 80px; text-align: center;">
+            </div>
+            <br>
+            <button type="submit" class="btn">{{ _('Update Score') }}</button>
+        </form>
+    </div>
+</div>
+<div class="grid">
+    <!-- Events List -->
+    <div class="card">
+        <h3>{{ _('📢 Match Events') }}</h3>
+        <ul>
+            {% for event in match.events %}
+            <li>
+                <strong>{{ event.minute }}'</strong>
+
+                {% if players[event.player_id] %}
+                {{ players[event.player_id].name }}
+                {% else %}
+                {{ _('Unknown Player') }}
+                {% endif %}
+
+                {% if event.type == 'goal' %}
+                ⚽ {{ _('Goal') }}
+                {% elif event.type == 'yellow' %}
+                🟨 {{ _('Yellow Card') }}
+                {% elif event.type == 'red' %}
+                🟥 {{ _('Red Card') }}
+                {% endif %}
+
+                ({{ _('Home') if event.team_id == home_team.id else _('Away') }})
+            </li>
+            {% else %}
+            <li>{{ _('No events recorded.') }}</li>
+            {% endfor %}
+        </ul>
+    </div>
     <!-- Home Team Events -->
     <div class="card">
         <h4>{{ home_team.name }} {{ _('Events') }}</h4>
@@ -147,8 +149,8 @@
     </div>
 </div>
 
-<div style="margin-top: 20px;">
+<!-- <div style="margin-top: 20px;">
     <a href="{{ url_for('tournaments.tournament_schedule', t_id=t.id) }}" class="btn btn-secondary">{{ _('Back to
         Schedule') }}</a>
-</div>
+</div> -->
 {% endblock %}
